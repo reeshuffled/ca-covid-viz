@@ -60,6 +60,7 @@
 	info.update = function (props) {
 		this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
 			'<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />' : 'Hover over a county');
+			//the stuff that needs are placeholders are props.cases and deaths. They need to take data from the database
 	};
 
 	info.addTo(map);
@@ -84,7 +85,7 @@
 			color: 'white',
 			dashArray: '3',
 			fillOpacity: 0.7,
-			fillColor: getCases(feature.properties.cases)
+			fillColor: getCases(feature.properties.cases)//this is the a placeholder getCases needs to get the amount of cases from a database
 		};
 	}
 
