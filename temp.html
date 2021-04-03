@@ -59,7 +59,7 @@
 
 	info.update = function (props) {
 		this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-			'<b>' + props.county + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + 'deaths<br />' : 'Hover over a county');
+			'<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />' : 'Hover over a county');
 	};
 
 	info.addTo(map);
