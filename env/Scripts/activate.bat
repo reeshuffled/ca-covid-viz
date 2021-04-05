@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\James\Desktop\CMSC\hw\CMSC 447\projects\ca-covid-viz\env
+set VIRTUAL_ENV=D:\CollegeDocs\CMSC 447\projectRepo\ca-covid-viz\env
 
 if not defined PROMPT set PROMPT=$P$G
 
