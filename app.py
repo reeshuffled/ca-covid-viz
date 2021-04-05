@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 import csv
 
 # initialize Flask application
-app = Flask(__name__)
+app = Flask(__name__, static_url_path="")
 
 # configure and initialize SQLAlchemy database connection
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
@@ -27,6 +27,10 @@ class Day(db.Model):
     cases = db.Column(db.Integer)
     deaths = db.Column(db.Integer)
 
+@app.route("/")
+def index():
+    return app.send_static_file("map.html")
+
 @app.route("/date", methods=["POST"])
 def get_data_by_date():
     """
@@ -35,7 +39,7 @@ def get_data_by_date():
 
     # error checking to make sure there is a date
     if "date" not in request.json:
-        return "You need to supply a date in your request JSON body.", 400
+        return "You need to supply a date in your request JSON body.", 400 
 
     # get existing student object by id from request data
     results = Day.query.filter_by(date=request.json["date"]).all()
