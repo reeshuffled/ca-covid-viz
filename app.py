@@ -29,7 +29,7 @@ class Day(db.Model):
 
 @app.route("/")
 def index():
-    return app.send_static_file("map.html")
+    return app.send_static_file("temp.html")
 
 @app.route("/date", methods=["POST"])
 def get_data_by_date():
