@@ -5,8 +5,17 @@ body {
 }
 
 #map {
-    width: 800px;
-    height: 500px;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    z-index: 2;
+}
+
+#dataControls {
+    position: absolute;
+    left: 50px;
+    z-index: 2000;
 }
 
 .info {

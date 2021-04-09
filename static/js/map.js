@@ -1,32 +1,51 @@
-var map = L.map('map').setView([37.8, -96], 4);
-
-L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
-    maxZoom: 18,
-    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
-        'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-    id: 'mapbox/light-v9',
-    tileSize: 512,
-    zoomOffset: -1
-}).addTo(map);
-
+const map = L.map('map').setView([37.8, -96], 4);
 
 // control that shows state info on hover
-var info = L.control();
+const info = L.control();
 
-info.onAdd = function (map) {
-    this._div = L.DomUtil.create('div', 'info');
-    this.update();
-    return this._div;
-};
+// global variable for cases
+let cases = [];
 
-info.update = function (props) {
-    this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-        '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />' : 'Hover over a county');
-        //the stuff that needs are placeholders are props.cases and deaths. They need to take data from the database
-};
+/**
+ * Initialize the UI components.
+ */
+(async function initUI() {
+    L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+        maxZoom: 18,
+        attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, ' +
+            'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        id: 'mapbox/light-v9',
+        tileSize: 512,
+        zoomOffset: -1
+    }).addTo(map);
+    
+    // bind date input to get case data
+    document.getElementById("dateInput").oninput = e => getCasesByDate(e.target.value);
 
-info.addTo(map);
+    info.onAdd = function (map) {
+        this._div = L.DomUtil.create('div', 'info');
+        this.update();
+        return this._div;
+    };
 
+    info.update = function (props) {
+        this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
+            '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />' : 'Hover over a county');
+            //the stuff that needs are placeholders are props.cases and deaths. They need to take data from the database
+    };
+
+    info.addTo(map);
+    
+    // get the case data for today
+    const today = new Date();
+    await getCasesByDate(`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`);
+
+    // load the state GeoJSON data
+    geojson = L.geoJson(statesData, {
+        style: style,
+        onEachFeature: onEachFeature
+    }).addTo(map);
+})();
 
 // get color depending on population cases value
 function getCases(d) {
@@ -51,7 +70,7 @@ function style(feature) {
     };
 }
 
-let cases = [];
+
 
 /**
  * A function that queries the API for case data for a specific date.
@@ -76,11 +95,10 @@ async function getCasesByDate(date) {
     const response = await request.json();
     const data = response.data;
 
-    // print the data
     cases = data;
-}
 
-getCasesByDate("2021-01-20");
+    document.getElementById("dateInput").value = response.date;
+}
 
 function highlightFeature(e) {
     var layer = e.target;
@@ -96,8 +114,10 @@ function highlightFeature(e) {
         layer.bringToFront();
     }
 
+    // find the case data for the county
     const caseData = cases.find(x => x.county == layer.feature.properties.name);
 
+    // set the layer feature properties if there is case data
     layer.feature.properties.cases = caseData?.cases;
     layer.feature.properties.deaths = caseData?.deaths;
 
@@ -135,17 +155,6 @@ function onEachFeature(feature, layer) {
         }
     }
 }
-
-(async function init() {
-    await getCasesByDate("2021-01-20");
-
-    geojson = L.geoJson(statesData, {
-        style: style,
-        onEachFeature: onEachFeature
-    }).addTo(map);
-})();
-
-
 
 map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
 

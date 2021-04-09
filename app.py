@@ -1,7 +1,7 @@
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 import csv
-import requests
+from datetime import datetime, timedelta
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
@@ -45,7 +45,6 @@ PRSN_LAT = 34
 PRSN_LON = 35
 
 class Prison(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
     facilityID = db.Column(db.Integer)
     state = db.Column(db.String(80))
@@ -78,7 +77,20 @@ def get_data_by_date():
         return "You need to supply a date in your request JSON body.", 400 
 
     # get existing student object by id from request data
-    results = Day.query.filter_by(date=request.json["date"]).all()
+    date = request.json["date"]
+    results = Day.query.filter_by(date=date).all()
+
+    # roll back date until there are entries in the DB
+    while len(list(results)) == 0:
+        # convert the date string to a datetime object
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
+
+        # roll back one day and convert back to string
+        date_obj -= timedelta(days=1)
+        date = datetime.strftime(date_obj, "%Y-%m-%d")
+
+        # check database to see if there are entries for this date
+        results = Day.query.filter_by(date=date).all()
 
     # convert Day objects into dictionaries that are easily JSON-ified
     data = []
@@ -94,6 +106,7 @@ def get_data_by_date():
 
     # return a JSON with the data that was found
     return {
+        "date": date,
         "data": data
     }
 
@@ -159,4 +172,3 @@ def init_db():
 
         # save the new student in the database
         db.session.commit()
-
