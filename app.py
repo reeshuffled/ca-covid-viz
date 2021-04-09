@@ -1,6 +1,7 @@
 from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 import csv
+import requests
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
@@ -26,6 +27,41 @@ class Day(db.Model):
     county = db.Column(db.String(80))
     cases = db.Column(db.Integer)
     deaths = db.Column(db.Integer)
+
+FACILITY_ID = 0
+PRSN_STATE = 2
+PRSN_NAME = 3
+PRSN_DATE = 4
+PRSN_RES_CONF = 6
+PRSN_STAFF_CONF = 7
+PRSN_RES_DEATHS = 8
+PRSN_STAFF_DEATHS = 9
+PRSN_RES_REC = 10
+PRSN_STAFF_REC = 11
+PRSN_POP_FEB20 = 21
+PRSN_RES_POP = 22
+PRSN_COUNTY = 33
+PRSN_LAT = 34
+PRSN_LON = 35
+
+class Prison(db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)
+    facilityID = db.Column(db.Integer)
+    state = db.Column(db.String(80))
+    name = db.Column(db.String(80))
+    date = db.Column(db.String(80))
+    residentsConfirmed = db.Column(db.Integer)
+    staffConfirmed = db.Column(db.Integer)
+    residentsDeaths = db.Column(db.Integer)
+    staffDeaths= db.Column(db.Integer)
+    residentsRecovered = db.Column(db.Integer)
+    staffRecovered = db.Column(db.Integer)
+    popFebTwenty = db.Column(db.Integer)
+    residentsPopulation= db.Column(db.Integer)
+    county = db.Column(db.String(80))
+    latitude = db.Column(db.Integer)
+    longitude = db.Column(db.Integer)
 
 @app.route("/")
 def index():
@@ -87,3 +123,40 @@ def init_db():
 
         # save the new student in the database
         db.session.commit()
+
+    # open the csv data file
+    with open("CA-historical-data.csv") as csvfile:
+        # create a CSV reader for the file
+        reader = csv.reader(csvfile)
+
+        prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
+
+        # create DB objects for each CA entry from the CSV file
+        for entry in prison_data:
+            # record county name, daily cases, and daily deaths
+            data = {
+
+                "facilityID": entry[FACILITY_ID],
+                "state": entry[PRSN_STATE],
+                "name": entry[PRSN_NAME],
+                "date": entry[PRSN_DATE],
+                "residentsConfirmed": entry[PRSN_RES_CONF],
+                "staffConfirmed": entry[PRSN_STAFF_CONF],
+                "residentsDeaths": entry[PRSN_RES_DEATHS],
+                "staffDeaths": entry[PRSN_STAFF_DEATHS],
+                "residentsRecovered": entry[PRSN_RES_REC],
+                "staffRecovered": entry[PRSN_STAFF_REC],
+                "popFebTwenty": entry[PRSN_POP_FEB20], 
+                "residentsPopulation": entry[PRSN_RES_POP], 
+                "county": entry[PRSN_COUNTY],
+                "latitude": entry[PRSN_LAT],
+                "longitude": entry[PRSN_LON]
+
+            }
+
+            # create a Prison object and add to the database
+            db.session.add(Prison(**data))
+
+        # save the new student in the database
+        db.session.commit()
+
