@@ -111,7 +111,7 @@ def get_data_by_date():
         "data": data
     }
 
-def create_pointers():
+def create_pointers(): #when you run this function, spacing can be done manually if desired clean format
     with open("CA-historical-data.csv") as csvfile:
         # create a CSV reader for the file
         reader = csv.reader(csvfile)
@@ -136,7 +136,7 @@ def create_pointers():
                 #"totPopulation": entry[PRSN_RES_POP],
                 },
             })
-            pairs.append([entry[PRSN_LAT],entry[PRSN_LON]])
+            pairs.add([entry[PRSN_LAT],entry[PRSN_LON]])
         
         
     myString = json.dumps(points)
