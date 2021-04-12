@@ -1,7 +1,8 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import csv
 from datetime import datetime, timedelta
+import json
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
@@ -109,6 +110,38 @@ def get_data_by_date():
         "date": date,
         "data": data
     }
+
+def create_pointers():
+    with open("CA-historical-data.csv") as csvfile:
+        # create a CSV reader for the file
+        reader = csv.reader(csvfile)
+
+        prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
+
+        # create DB objects for each CA entry from the CSV file
+    points = []
+    f = open("prisonData.js", "w")
+    f.write("var statesData = {\"type\":\"FeatureCollection\",\"features\":\n")
+    f.close()
+    for entry in prison_data:
+        points.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": [entry[PRSN_LAT],entry[PRSN_LON]],
+                "totDeath": entry[PRSN_RES_DEATHS],
+                "totConfirmed": entry[PRSN_RES_CONF],
+                "totPopulation": entry[PRSN_RES_POP],
+            },
+        })
+    myString = json.dumps(points)
+    f = open("prisonData.js", "a")
+    f.write(myString)
+    f.write("\n")
+    f.write("};")
+    f.close()
+    
+        
 
 def init_db():
     db.create_all()
