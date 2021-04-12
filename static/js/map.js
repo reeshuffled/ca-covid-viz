@@ -7,6 +7,7 @@ const dateInput = document.getElementById("dateInput");
 
 // global variables
 let geojson;
+let marker;
 let cases = [];
 const counties = [];
 
@@ -76,6 +77,9 @@ const counties = [];
             }
         }
     }).addTo(map);
+    marker = L.geoJson(prisonData).addTo(map);
+
+
 })();
 
 /**

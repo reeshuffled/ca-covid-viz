@@ -120,20 +120,25 @@ def create_pointers():
 
         # create DB objects for each CA entry from the CSV file
     points = []
+    pairs = []
     f = open("prisonData.js", "w")
-    f.write("var statesData = {\"type\":\"FeatureCollection\",\"features\":\n")
+    f.write("var prisonData = {\"type\":\"FeatureCollection\",\"features\":\n")
     f.close()
     for entry in prison_data:
-        points.append({
-            "type": "Feature",
-            "geometry": {
-                "type": "Point",
-                "coordinates": [entry[PRSN_LAT],entry[PRSN_LON]],
-                "totDeath": entry[PRSN_RES_DEATHS],
-                "totConfirmed": entry[PRSN_RES_CONF],
-                "totPopulation": entry[PRSN_RES_POP],
-            },
-        })
+        if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs:
+            points.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [entry[PRSN_LAT],entry[PRSN_LON]],
+                #"totDeath": entry[PRSN_RES_DEATHS],
+                #"totConfirmed": entry[PRSN_RES_CONF],
+                #"totPopulation": entry[PRSN_RES_POP],
+                },
+            })
+            pairs.append([entry[PRSN_LAT],entry[PRSN_LON]])
+        
+        
     myString = json.dumps(points)
     f = open("prisonData.js", "a")
     f.write(myString)
