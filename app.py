@@ -1,8 +1,13 @@
-from flask import Flask, request
+from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 import csv
 from datetime import datetime, timedelta
 import requests
+import json
+<<<<<<< HEAD
+import requests
+=======
+>>>>>>> 1efb0f2098043a9bb368e508f748659be5376e3f
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
@@ -113,6 +118,43 @@ def get_data_by_date():
         "date": date,
         "data": data
     }
+
+def create_pointers():
+    with open("CA-historical-data.csv") as csvfile:
+        # create a CSV reader for the file
+        reader = csv.reader(csvfile)
+
+        prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
+
+        # create DB objects for each CA entry from the CSV file
+    points = []
+    pairs = []
+    f = open("prisonData.js", "w")
+    f.write("var prisonData = {\"type\":\"FeatureCollection\",\"features\":\n")
+    f.close()
+    for entry in prison_data:
+        if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs:
+            points.append({
+                "type": "Feature",
+                "geometry": {
+                    "type": "Point",
+                    "coordinates": [entry[PRSN_LAT],entry[PRSN_LON]],
+                #"totDeath": entry[PRSN_RES_DEATHS],
+                #"totConfirmed": entry[PRSN_RES_CONF],
+                #"totPopulation": entry[PRSN_RES_POP],
+                },
+            })
+            pairs.append([entry[PRSN_LAT],entry[PRSN_LON]])
+        
+        
+    myString = json.dumps(points)
+    f = open("prisonData.js", "a")
+    f.write(myString)
+    f.write("\n")
+    f.write("};")
+    f.close()
+    
+        
 
 def init_db():
     db.create_all()

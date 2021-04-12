@@ -7,6 +7,7 @@ const dateInput = document.getElementById("dateInput");
 
 // global variables
 let geojson;
+let marker;
 let cases = [];
 const counties = [];
 
@@ -76,6 +77,9 @@ const counties = [];
             }
         }
     }).addTo(map);
+    marker = L.geoJson(prisonData).addTo(map);
+
+
 })();
 
 /**
@@ -241,4 +245,20 @@ function resetHighlight(e) {
 
 function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
+}
+
+
+function addPoints(prisonData){
+
+    points = []
+    for (entry in prisonData){
+        points.append({
+            "type": "Feature",
+            "geometry": {
+                "type": "Point",
+                "coordinates": entry[Prison.latitude,Prison.longitude]
+            }
+        })
+    }
+    pointers.innerHTML = JSON.stringify(points)
 }
