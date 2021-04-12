@@ -2,6 +2,7 @@ from flask import Flask, request
 from flask_sqlalchemy import SQLAlchemy
 import csv
 from datetime import datetime, timedelta
+import requests
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
@@ -10,6 +11,9 @@ app = Flask(__name__, static_url_path="")
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
+
+COUNTY_URL = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
+PRISON_URL = "https://raw.githubusercontent.com/uclalawcovid19behindbars/historical-data/main/data/CA-historical-data.csv"
 
 # constants for the CSV file
 DATE_INDEX = 0
@@ -114,61 +118,64 @@ def init_db():
     db.create_all()
 
     # open the csv data file
-    with open("us-counties.csv") as csvfile:
-        # create a CSV reader for the file
-        reader = csv.reader(csvfile)
+    #with open("us-counties.csv") as csvfile:
+ 
+    r = requests.get(COUNTY_URL)
 
-        # get only the CA entries
-        cali_data = list(filter(lambda x: x[STATE_INDEX] == "California", reader))
+    decoded_content = r.content.decode('utf-8')
 
-        # create DB objects for each CA entry from the CSV file
-        for entry in cali_data:
-            # record county name, daily cases, and daily deaths
-            data = {
-                "date": entry[DATE_INDEX],
-                "county": entry[COUNTY_INDEX],
-                "cases": entry[CASES_INDEX],
-                "deaths": entry[DEATHS_INDEX]
-            }
+    cr = csv.reader(decoded_content.splitlines(), delimiter=',')
 
-            # create a Day object and add to the database
-            db.session.add(Day(**data))
+    cali_data = list(filter(lambda x: x[STATE_INDEX] == "California", cr))
+
+    for entry in cali_data:
+        # record county name, daily cases, and daily deaths
+        data = {
+            "date": entry[DATE_INDEX],
+            "county": entry[COUNTY_INDEX],
+            "cases": entry[CASES_INDEX],
+            "deaths": entry[DEATHS_INDEX]
+        }
+
+        # create a Day object and add to the database
+        db.session.add(Day(**data))
 
         # save the new student in the database
         db.session.commit()
 
-    # open the csv data file
-    with open("CA-historical-data.csv") as csvfile:
-        # create a CSV reader for the file
-        reader = csv.reader(csvfile)
+    r = requests.get(PRISON_URL)
 
-        prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
+    decoded_content = r.content.decode('utf-8')
 
-        # create DB objects for each CA entry from the CSV file
-        for entry in prison_data:
-            # record county name, daily cases, and daily deaths
-            data = {
+    cr = csv.reader(decoded_content.splitlines(), delimiter=',')
 
-                "facilityID": entry[FACILITY_ID],
-                "state": entry[PRSN_STATE],
-                "name": entry[PRSN_NAME],
-                "date": entry[PRSN_DATE],
-                "residentsConfirmed": entry[PRSN_RES_CONF],
-                "staffConfirmed": entry[PRSN_STAFF_CONF],
-                "residentsDeaths": entry[PRSN_RES_DEATHS],
-                "staffDeaths": entry[PRSN_STAFF_DEATHS],
-                "residentsRecovered": entry[PRSN_RES_REC],
-                "staffRecovered": entry[PRSN_STAFF_REC],
-                "popFebTwenty": entry[PRSN_POP_FEB20], 
-                "residentsPopulation": entry[PRSN_RES_POP], 
-                "county": entry[PRSN_COUNTY],
-                "latitude": entry[PRSN_LAT],
-                "longitude": entry[PRSN_LON]
+    prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", cr))
 
-            }
+    # create DB objects for each CA entry from the CSV file
+    for entry in prison_data:
+        # record county name, daily cases, and daily deaths
+        data = {
 
-            # create a Prison object and add to the database
-            db.session.add(Prison(**data))
+            "facilityID": entry[FACILITY_ID],
+            "state": entry[PRSN_STATE],
+            "name": entry[PRSN_NAME],
+            "date": entry[PRSN_DATE],
+            "residentsConfirmed": entry[PRSN_RES_CONF],
+            "staffConfirmed": entry[PRSN_STAFF_CONF],
+            "residentsDeaths": entry[PRSN_RES_DEATHS],
+            "staffDeaths": entry[PRSN_STAFF_DEATHS],
+            "residentsRecovered": entry[PRSN_RES_REC],
+            "staffRecovered": entry[PRSN_STAFF_REC],
+            "popFebTwenty": entry[PRSN_POP_FEB20], 
+            "residentsPopulation": entry[PRSN_RES_POP], 
+            "county": entry[PRSN_COUNTY],
+            "latitude": entry[PRSN_LAT],
+            "longitude": entry[PRSN_LON]
+
+        }
+
+        # create a Prison object and add to the database
+        db.session.add(Prison(**data))
 
         # save the new student in the database
         db.session.commit()
