@@ -19,7 +19,6 @@ var prisonData = {"type":"FeatureCollection","features":
     {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["38.32077652", "-121.9752369"]}}, 
     {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["33.16569337", "-115.484344"]}}, 
     {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["37.155177", "-119.543418"]}}, 
-    {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["NA", "NA"]}}, 
     {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["32.82339731", "-115.7890555"]}}, 
     {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["37.09368073", "-120.1527098"]}}, 
     {"type": "Feature", "geometry": {"type": "Point", "coordinates": ["33.56257951", "-114.9095058"]}}, 
