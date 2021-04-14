@@ -4,6 +4,8 @@ import csv
 from datetime import datetime, timedelta
 import requests
 import json
+import requests
+
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
 
@@ -114,7 +116,7 @@ def get_data_by_date():
         "data": data
     }
 
-def create_pointers(): #when you run this function, spacing can be done manually if desired clean format
+def create_pointers():
     with open("CA-historical-data.csv") as csvfile:
         # create a CSV reader for the file
         reader = csv.reader(csvfile)
@@ -139,7 +141,7 @@ def create_pointers(): #when you run this function, spacing can be done manually
                 #"totPopulation": entry[PRSN_RES_POP],
                 },
             })
-            pairs.add([entry[PRSN_LAT],entry[PRSN_LON]])
+            pairs.append([entry[PRSN_LAT],entry[PRSN_LON]])
         
         
     myString = json.dumps(points)
@@ -154,9 +156,6 @@ def create_pointers(): #when you run this function, spacing can be done manually
 def init_db():
     db.create_all()
 
-    # open the csv data file
-    #with open("us-counties.csv") as csvfile:
- 
     r = requests.get(COUNTY_URL)
 
     decoded_content = r.content.decode('utf-8')

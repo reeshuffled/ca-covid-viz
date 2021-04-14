@@ -1,4 +1,4 @@
-const map = L.map('map').setView([37.8, -96], 4);
+const map = L.map('map').setView([37.8, -96], 5);
 
 // control that shows state info on hover
 const info = L.control();
@@ -77,9 +77,39 @@ const counties = [];
             }
         }
     }).addTo(map);
-    marker = L.geoJson(prisonData).addTo(map);
 
+    console.log(prisonData['features'].length)
 
+    for(i = 0; i < prisonData['features'].length; i++){
+
+        console.log(prisonData['features'][i].geometry.coordinates)
+
+        lat = parseFloat(prisonData['features'][i].geometry.coordinates[0])
+        lng = parseFloat(prisonData['features'][i].geometry.coordinates[1])
+
+        if(lat != "NA" && lng != "NA"){
+
+            //L.marker([lat, lng]).addTo(map);
+
+            //actual prison location
+            var circle = L.circle([lat, lng], {
+                color: 'white',
+                fillColor: '#FFFFFF',
+                fillOpacity: 1,
+                radius: 100
+            }).addTo(map);
+
+            //circle surrounding prison
+            var circle = L.circle([lat, lng], {
+                //color: 'black',
+                fillColor: '#000000',
+                fillOpacity: .4,
+                radius: 1000
+            }).addTo(map);
+
+        }
+
+    }
 })();
 
 /**
@@ -136,6 +166,9 @@ async function getCasesByDate(date) {
 
     // update the county coloring by case data
     counties.forEach(x => x.layer.setStyle(getCountyStyle(x.feature)));
+
+    
+
 }
 
 /**
@@ -143,6 +176,7 @@ async function getCasesByDate(date) {
  * map.
  */
 function addMapLegend() {
+
     const legend = L.control({position: 'bottomright'});
 
     legend.onAdd = function (map) {
@@ -204,7 +238,7 @@ function getCountyStyle(feature) {
         opacity: 1,
         color: 'white',
         dashArray: '3',
-        fillOpacity: 0.7,
+        fillOpacity: 0.5,
         fillColor: getFillColorByCases(feature.properties.cases)//this is the a placeholder getCases needs to get the amount of cases from a database
     };
 }
@@ -220,12 +254,12 @@ function highlightFeature(e) {
         weight: 5,
         color: '#666',
         dashArray: '',
-        fillOpacity: 0.7
+        fillOpacity: 0.5
     });
 
-    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-        layer.bringToFront();
-    }
+    //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        //layer.bringToFront();
+    //}
 
     // find the case data for the county
     const caseData = cases.find(x => x.county == layer.feature.properties.name);
