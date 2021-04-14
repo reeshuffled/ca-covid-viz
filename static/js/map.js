@@ -135,7 +135,23 @@ async function getCasesByDate(date) {
     dateInput.value = response.date;
 
     // update the county coloring by case data
-    counties.forEach(x => x.layer.setStyle(getCountyStyle(x.feature)));
+    counties.forEach(county => {
+        // find the case data for the county
+        const caseData = cases.find(x => x.county == county.layer?.feature.properties.name);
+
+        // if there is case data found for the county
+        if (caseData != null)
+        {
+            // update the county cases and death properties
+            county.feature.properties.cases = caseData.cases;
+            county.feature.properties.deaths = caseData.deaths;
+
+            // update the style because the case data changed
+            county.layer.setStyle(getCountyStyle(county.feature));
+        }
+
+        info.update(county.layer.feature.properties);
+    });
 }
 
 /**
