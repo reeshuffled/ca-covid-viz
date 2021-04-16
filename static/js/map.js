@@ -165,12 +165,6 @@ async function getCasesByDate(date) {
     dateInput.value = response.date;
 
     // update the county coloring by case data
-<<<<<<< HEAD
-    counties.forEach(x => x.layer.setStyle(getCountyStyle(x.feature)));
-
-    
-
-=======
     counties.forEach(county => {
         // find the case data for the county
         const caseData = cases.find(x => x.county == county.layer?.feature.properties.name);
@@ -188,7 +182,6 @@ async function getCasesByDate(date) {
 
         info.update(county.layer.feature.properties);
     });
->>>>>>> 8b4e465a3e4b2080d69c9d7d42d8e7b2b8d91bed
 }
 
 /**

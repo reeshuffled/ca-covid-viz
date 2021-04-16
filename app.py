@@ -133,6 +133,11 @@ def create_pointers():
         if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs:
             points.append({
                 "type": "Feature",
+                "properties":
+                    {"kind":"prison",
+                    "name":entry[PRSN_NAME],
+                    "facilityID": entry[FACILITY_ID]
+                },
                 "geometry": {
                     "type": "Point",
                     "coordinates": [entry[PRSN_LAT],entry[PRSN_LON]],
@@ -140,7 +145,7 @@ def create_pointers():
                 #"totConfirmed": entry[PRSN_RES_CONF],
                 #"totPopulation": entry[PRSN_RES_POP],
                 },
-            })
+                })
             pairs.append([entry[PRSN_LAT],entry[PRSN_LON]])
         
         
