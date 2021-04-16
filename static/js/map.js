@@ -10,6 +10,7 @@ let geojson;
 let marker;
 let cases = [];
 const counties = [];
+const prisons = [];
 
 /**
  * Initialize the UI components.
@@ -79,7 +80,65 @@ const counties = [];
         }
     }).addTo(map);
 
-    // add the markers for prisons to the map
+    // load the state GeoJSON data
+    geojson = L.circle(prisonData, {
+        //style: getCountyStyle,
+        onEachFeature: (feature, layer) => {
+            // bind mouseo and click events for highlighting and zooming
+            /*layer.on({
+                mouseover: highlightFeature,
+                mouseout: resetHighlight,
+                click: zoomToFeature
+            });*/
+
+            // if the feature is a county
+            if (layer.feature.properties.kind == "prison")
+            {
+                // add the feature to the counties array
+                prisons.push({
+                    layer: layer,
+                    feature: layer.feature
+                });
+
+                // find the case data for the county
+                const prsnCaseData = cases.prison.find(x => x.prison == layer.feature.properties.name);
+
+                // if there is case data found for the county
+                if (prsnCaseData != null)
+                {
+                    // update the county cases and death properties
+                    layer.feature.properties.date = prsnCaseData.date;
+                    layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
+                    layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
+
+                    layer.feature.properties.deathsRes = prsnCaseData.residentsDeaths;
+                    layer.feature.properties.deathsStaff = prsnCaseData.staffDeaths;
+
+                    layer.feature.properties.residentsRecovered = prsnCaseData.residentsRecovered;
+                    layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
+
+                    layer.feature.properties.popFebTwenty = prsnCaseData.popFebTwenty;
+                    layer.feature.properties.residentsPopulation = prsnCaseData.residentsPopulation;
+
+                    layer.feature.properties.county = prsnCaseData.county;
+                    layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
+
+                    lat = prsnCaseData.latitude;
+                    lng = prsnCaseData.longitude;
+
+                    // update the style because the case data changed
+                    //layer.setStyle(getCountyStyle(feature));
+
+                    if(lat != "NA" && lng != "NA"){
+
+                        const [ lat, lng ] = feature.geometry.coordinates;
+                    }
+                }
+            }
+        }
+    }).addTo(map);
+
+    /*// add the markers for prisons to the map
     prisonData.features.forEach(feature => {
         // get latitude and longitude coordinates
         const [ lat, lng ] = feature.geometry.coordinates;
@@ -98,7 +157,7 @@ const counties = [];
             fillOpacity: .4,
             radius: 1000
         }).addTo(map);
-    })
+    })*/
 })();
 
 /**
@@ -222,6 +281,22 @@ function addMapLegend() {
  * @returns {String} color
  */
 function getFillColorByCases(d) {
+    return d > 1000000 ? '#800026' :
+            d > 80000  ? '#BD0026' :
+            d > 60000  ? '#E31A1C' :
+            d > 40000  ? '#FC4E2A' :
+            d > 20000   ? '#FD8D3C' :
+            d > 15000   ? '#FEB24C' :
+            d > 10000   ? '#FED976' :
+                        '#FFEDA0';
+}
+
+/**
+ * Get the corresponding color for a daily case number within a range.
+ * @param {Number} d 
+ * @returns {String} color
+ */
+ function getFillColorByCases(d) {
     return d > 1000000 ? '#800026' :
             d > 80000  ? '#BD0026' :
             d > 60000  ? '#E31A1C' :
