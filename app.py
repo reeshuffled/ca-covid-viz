@@ -116,6 +116,64 @@ def get_data_by_date():
         "data": data
     }
 
+@app.route("/date/prsn", methods=["POST"])
+def get_data_by_date_prsn():
+    """
+    Responds to POST requests with a JSON with date: "YYYY-MM-DD".
+    """
+
+    # error checking to make sure there is a date
+    if "date" not in request.json:
+        return "You need to supply a date in your request JSON body.", 400 
+
+    # get existing student object by id from request data
+    date = request.json["date"]
+    results = Prison.query.filter_by(date=date).all()
+
+    # roll back date until there are entries in the DB
+    while len(list(results)) == 0:
+        # convert the date string to a datetime object
+        date_obj = datetime.strptime(date, "%Y-%m-%d")
+
+        # roll back one day and convert back to string
+        date_obj -= timedelta(days=1)
+        date = datetime.strftime(date_obj, "%Y-%m-%d")
+
+        # check database to see if there are entries for this date
+        results = Prison.query.filter_by(date=date).all()
+
+    # convert Day objects into dictionaries that are easily JSON-ified
+    data = []
+    for result in results:
+        entry = {
+
+            "id": result.id,
+            "facilityID": result.facilityID,
+            "state": result.state,
+            "name": result.name,
+            "date": result.date,
+            "residentsConfirmed": result.residentsConfirmed,
+            "staffConfirmed": result.staffConfirmed,
+            "residentsDeaths": result.residentsDeaths,
+            "staffDeaths": result.staffDeaths,
+            "residentsRecovered": result.residentsRecovered,
+            "staffRecovered": result.staffRecovered,
+            "popFebTwenty": result.popFebTwenty,
+            "residentsPopulation": result.residentsPopulation,
+            "county": result.county,
+            "latitude": result.latitude,
+            "longitude": result.longitude,
+
+        }
+
+        data.append(entry)
+
+    # return a JSON with the data that was found
+    return {
+        "date": date,
+        "data": data
+    }
+
 def create_pointers():
     with open("CA-historical-data.csv") as csvfile:
         # create a CSV reader for the file
