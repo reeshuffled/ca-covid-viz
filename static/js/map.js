@@ -70,6 +70,7 @@ const counties = [];
                     // update the county cases and death properties
                     layer.feature.properties.cases = caseData.cases;
                     layer.feature.properties.deaths = caseData.deaths;
+                    layer.feature.properties.date = caseData.date;
 
                     // update the style because the case data changed
                     layer.setStyle(getCountyStyle(feature));
@@ -126,7 +127,8 @@ function addInfoBox() {
 
     info.update = function(props) {
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-            '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />' : 'Hover over a county');
+            '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />'  + 
+            ' Data of data: <br /> ' + props.date + ' <br />': 'Hover over a county');
     };
 
     info.addTo(map);
@@ -165,12 +167,6 @@ async function getCasesByDate(date) {
     dateInput.value = response.date;
 
     // update the county coloring by case data
-<<<<<<< HEAD
-    counties.forEach(x => x.layer.setStyle(getCountyStyle(x.feature)));
-
-    
-
-=======
     counties.forEach(county => {
         // find the case data for the county
         const caseData = cases.find(x => x.county == county.layer?.feature.properties.name);
@@ -181,6 +177,7 @@ async function getCasesByDate(date) {
             // update the county cases and death properties
             county.feature.properties.cases = caseData.cases;
             county.feature.properties.deaths = caseData.deaths;
+            county.feature.properties.date = response.date;
 
             // update the style because the case data changed
             county.layer.setStyle(getCountyStyle(county.feature));
@@ -188,7 +185,61 @@ async function getCasesByDate(date) {
 
         info.update(county.layer.feature.properties);
     });
->>>>>>> 8b4e465a3e4b2080d69c9d7d42d8e7b2b8d91bed
+}
+
+/**
+ * A function that queries the API for case data for a specific date.
+ * @param {String} date
+ */
+ async function getCasesByDatePrison(date) {
+    // make a POST request to the /date endpoint of the Flask server
+    const request = await fetch("/date/prsn", {
+        method: "POST",
+        // let the server know we're POSTing JSON data
+        headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+        },
+        // stringify the JSON for transport
+        body: JSON.stringify({
+            date: date
+        })
+    });
+
+    // get the response JSON data from the server
+    const response = await request.json();
+    const data = response.data;
+
+    // update cases global variable with fetched data
+    cases = data;
+
+    /**
+     * set the date input to the date in the JSON response, this is necessary in
+     * case of date rollbacks because we don't have data for that date
+     */
+    dateInput.value = response.date;
+
+    //vvvvvvvvvvvvv NEED TO CHANGE vvvvvvvvvvv 
+
+    // update the county coloring by case data
+    counties.forEach(county => {
+        // find the case data for the county
+        const caseData = cases.find(x => x.county == county.layer?.feature.properties.name);
+
+        // if there is case data found for the county
+        if (caseData != null)
+        {
+            // update the county cases and death properties
+            county.feature.properties.cases = caseData.cases;
+            county.feature.properties.deaths = caseData.deaths;
+            county.feature.properties.date = response.date;
+
+            // update the style because the case data changed
+            county.layer.setStyle(getCountyStyle(county.feature));
+        }
+
+        info.update(county.layer.feature.properties);
+    });
 }
 
 /**
