@@ -62,7 +62,7 @@ const counties = [];
                 });
 
                 // find the case data for the county
-                const caseData = cases.find(x => x.county == layer.feature.properties.name);
+                const caseData = cases.county.find(x => x.county == layer.feature.properties.name);
 
                 // if there is case data found for the county
                 if (caseData != null)
@@ -79,38 +79,26 @@ const counties = [];
         }
     }).addTo(map);
 
-    console.log(prisonData['features'].length)
+    // add the markers for prisons to the map
+    prisonData.features.forEach(feature => {
+        // get latitude and longitude coordinates
+        const [ lat, lng ] = feature.geometry.coordinates;
+        
+        // add marker for location of prison
+        L.circle([lat, lng], {
+            color: 'white',
+            fillColor: '#FFFFFF',
+            fillOpacity: 1,
+            radius: 100
+        }).addTo(map);
 
-    for(i = 0; i < prisonData['features'].length; i++){
-
-        console.log(prisonData['features'][i].geometry.coordinates)
-
-        lat = parseFloat(prisonData['features'][i].geometry.coordinates[0])
-        lng = parseFloat(prisonData['features'][i].geometry.coordinates[1])
-
-        if(lat != "NA" && lng != "NA"){
-
-            //L.marker([lat, lng]).addTo(map);
-
-            //actual prison location
-            var circle = L.circle([lat, lng], {
-                color: 'white',
-                fillColor: '#FFFFFF',
-                fillOpacity: 1,
-                radius: 100
-            }).addTo(map);
-
-            //circle surrounding prison
-            var circle = L.circle([lat, lng], {
-                //color: 'black',
-                fillColor: '#000000',
-                fillOpacity: .4,
-                radius: 1000
-            }).addTo(map);
-
-        }
-
-    }
+        // add radius around prison
+        L.circle([lat, lng], {
+            fillColor: '#000000',
+            fillOpacity: .4,
+            radius: 1000
+        }).addTo(map);
+    })
 })();
 
 /**
@@ -155,76 +143,26 @@ async function getCasesByDate(date) {
 
     // get the response JSON data from the server
     const response = await request.json();
-    const data = response.data;
+    const data = response.countyData;
 
     // update cases global variable with fetched data
-    cases = data;
+    cases = {
+        county: response.countyData,
+        prison: response.prisonData
+    };
 
     /**
      * set the date input to the date in the JSON response, this is necessary in
      * case of date rollbacks because we don't have data for that date
      */
-    dateInput.value = response.date;
+    dateInput.value = response.countyDataDate;
+
+    console.log(response);
 
     // update the county coloring by case data
     counties.forEach(county => {
         // find the case data for the county
-        const caseData = cases.find(x => x.county == county.layer?.feature.properties.name);
-
-        // if there is case data found for the county
-        if (caseData != null)
-        {
-            // update the county cases and death properties
-            county.feature.properties.cases = caseData.cases;
-            county.feature.properties.deaths = caseData.deaths;
-            county.feature.properties.date = response.date;
-
-            // update the style because the case data changed
-            county.layer.setStyle(getCountyStyle(county.feature));
-        }
-
-        info.update(county.layer.feature.properties);
-    });
-}
-
-/**
- * A function that queries the API for case data for a specific date.
- * @param {String} date
- */
- async function getCasesByDatePrison(date) {
-    // make a POST request to the /date endpoint of the Flask server
-    const request = await fetch("/date/prsn", {
-        method: "POST",
-        // let the server know we're POSTing JSON data
-        headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json"
-        },
-        // stringify the JSON for transport
-        body: JSON.stringify({
-            date: date
-        })
-    });
-
-    // get the response JSON data from the server
-    const response = await request.json();
-    const data = response.data;
-
-    // update cases global variable with fetched data
-    cases = data;
-
-    /**
-     * set the date input to the date in the JSON response, this is necessary in
-     * case of date rollbacks because we don't have data for that date
-     */
-    dateInput.value = response.date;
-
-    //vvvvvvvvvvvvv NEED TO CHANGE vvvvvvvvvvv 
-
-    // update the county coloring by case data
-    counties.forEach(county => {
-        // find the case data for the county
-        const caseData = cases.find(x => x.county == county.layer?.feature.properties.name);
+        const caseData = cases.county.find(x => x.county == county.layer?.feature.properties.name);
 
         // if there is case data found for the county
         if (caseData != null)
@@ -247,7 +185,6 @@ async function getCasesByDate(date) {
  * map.
  */
 function addMapLegend() {
-
     const legend = L.control({position: 'bottomright'});
 
     legend.onAdd = function (map) {
@@ -333,7 +270,7 @@ function highlightFeature(e) {
     //}
 
     // find the case data for the county
-    const caseData = cases.find(x => x.county == layer.feature.properties.name);
+    const caseData = cases.county.find(x => x.county == layer.feature.properties.name);
 
     // set the layer feature properties if there is case data
     layer.feature.properties.cases = caseData?.cases;

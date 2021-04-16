@@ -83,24 +83,24 @@ def get_data_by_date():
         return "You need to supply a date in your request JSON body.", 400 
 
     # get existing student object by id from request data
-    date = request.json["date"]
-    results = Day.query.filter_by(date=date).all()
+    county_date = request.json["date"]
+    county_results = Day.query.filter_by(date=county_date).all()
 
     # roll back date until there are entries in the DB
-    while len(list(results)) == 0:
+    while len(list(county_results)) == 0:
         # convert the date string to a datetime object
-        date_obj = datetime.strptime(date, "%Y-%m-%d")
+        date_obj = datetime.strptime(county_date, "%Y-%m-%d")
 
         # roll back one day and convert back to string
         date_obj -= timedelta(days=1)
-        date = datetime.strftime(date_obj, "%Y-%m-%d")
+        county_date = datetime.strftime(date_obj, "%Y-%m-%d")
 
         # check database to see if there are entries for this date
-        results = Day.query.filter_by(date=date).all()
+        county_results = Day.query.filter_by(date=county_date).all()
 
     # convert Day objects into dictionaries that are easily JSON-ified
-    data = []
-    for result in results:
+    county_data = []
+    for result in county_results:
         entry = {
             "date": result.date,
             "county": result.county,
@@ -108,12 +108,54 @@ def get_data_by_date():
             "deaths": result.deaths
         }
 
-        data.append(entry)
+        county_data.append(entry)
+
+    # get existing student object by id from request data
+    prison_date = request.json["date"]
+    prison_results = Prison.query.filter_by(date=prison_date).all()
+
+    # roll back date until there are entries in the DB
+    while len(list(prison_results)) == 0:
+        # convert the date string to a datetime object
+        date_obj = datetime.strptime(prison_date, "%Y-%m-%d")
+
+        # roll back one day and convert back to string
+        date_obj -= timedelta(days=1)
+        prison_date = datetime.strftime(date_obj, "%Y-%m-%d")
+
+        # check database to see if there are entries for this date
+        prison_results = Prison.query.filter_by(date=prison_date).all()
+
+    # convert Prison objects into dictionaries that are easily JSON-ified
+    prison_data = []
+    for result in prison_results:
+        entry = {
+            "id": result.id,
+            "facilityID": result.facilityID,
+            "state": result.state,
+            "name": result.name,
+            "date": result.date,
+            "residentsConfirmed": result.residentsConfirmed,
+            "staffConfirmed": result.staffConfirmed,
+            "residentsDeaths": result.residentsDeaths,
+            "staffDeaths": result.staffDeaths,
+            "residentsRecovered": result.residentsRecovered,
+            "staffRecovered": result.staffRecovered,
+            "popFebTwenty": result.popFebTwenty,
+            "residentsPopulation": result.residentsPopulation,
+            "county": result.county,
+            "latitude": result.latitude,
+            "longitude": result.longitude,
+        }
+
+        prison_data.append(entry)
 
     # return a JSON with the data that was found
     return {
-        "date": date,
-        "data": data
+        "countyDataDate": county_date,
+        "countyData": county_data,
+        "prisonDataDate": prison_date,
+        "prisonData": prison_data
     }
 
 @app.route("/date/prsn", methods=["POST"])
@@ -146,7 +188,6 @@ def get_data_by_date_prsn():
     data = []
     for result in results:
         entry = {
-
             "id": result.id,
             "facilityID": result.facilityID,
             "state": result.state,
@@ -163,7 +204,6 @@ def get_data_by_date_prsn():
             "county": result.county,
             "latitude": result.latitude,
             "longitude": result.longitude,
-
         }
 
         data.append(entry)
