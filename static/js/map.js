@@ -80,84 +80,34 @@ const prisons = [];
         }
     }).addTo(map);
 
-    // load the state GeoJSON data
-    geojson = L.circle(prisonData, {
-        //style: getCountyStyle,
-        onEachFeature: (feature, layer) => {
-            // bind mouseo and click events for highlighting and zooming
-            /*layer.on({
-                mouseover: highlightFeature,
-                mouseout: resetHighlight,
-                click: zoomToFeature
-            });*/
-
-            // if the feature is a county
-            if (layer.feature.properties.kind == "prison")
-            {
-                // add the feature to the counties array
-                prisons.push({
-                    layer: layer,
-                    feature: layer.feature
-                });
-
-                // find the case data for the county
-                const prsnCaseData = cases.prison.find(x => x.prison == layer.feature.properties.name);
-
-                // if there is case data found for the county
-                if (prsnCaseData != null)
-                {
-                    // update the county cases and death properties
-                    layer.feature.properties.date = prsnCaseData.date;
-                    layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
-                    layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
-
-                    layer.feature.properties.deathsRes = prsnCaseData.residentsDeaths;
-                    layer.feature.properties.deathsStaff = prsnCaseData.staffDeaths;
-
-                    layer.feature.properties.residentsRecovered = prsnCaseData.residentsRecovered;
-                    layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
-
-                    layer.feature.properties.popFebTwenty = prsnCaseData.popFebTwenty;
-                    layer.feature.properties.residentsPopulation = prsnCaseData.residentsPopulation;
-
-                    layer.feature.properties.county = prsnCaseData.county;
-                    layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
-
-                    lat = prsnCaseData.latitude;
-                    lng = prsnCaseData.longitude;
-
-                    // update the style because the case data changed
-                    //layer.setStyle(getCountyStyle(feature));
-
-                    if(lat != "NA" && lng != "NA"){
-
-                        const [ lat, lng ] = feature.geometry.coordinates;
-                    }
-                }
-            }
-        }
-    }).addTo(map);
-
-    /*// add the markers for prisons to the map
+    // add the markers for prisons to the map
     prisonData.features.forEach(feature => {
         // get latitude and longitude coordinates
         const [ lat, lng ] = feature.geometry.coordinates;
         
         // add marker for location of prison
-        L.circle([lat, lng], {
+        var prison = L.circle([lat, lng], {
             color: 'white',
             fillColor: '#FFFFFF',
             fillOpacity: 1,
-            radius: 100
+            radius: 100,
+
         }).addTo(map);
 
         // add radius around prison
-        L.circle([lat, lng], {
+        var circle = L.circle([lat, lng], {
             fillColor: '#000000',
             fillOpacity: .4,
             radius: 1000
         }).addTo(map);
-    })*/
+
+        circle.layer.on({
+
+            mouseover: highlightFeature
+
+        });
+
+    })
 })();
 
 /**
