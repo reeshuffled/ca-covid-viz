@@ -143,7 +143,6 @@ async function getCasesByDate(date) {
 
     // get the response JSON data from the server
     const response = await request.json();
-    const data = response.countyData;
 
     // update cases global variable with fetched data
     cases = {
@@ -156,8 +155,6 @@ async function getCasesByDate(date) {
      * case of date rollbacks because we don't have data for that date
      */
     dateInput.value = response.countyDataDate;
-
-    console.log(response);
 
     // update the county coloring by case data
     counties.forEach(county => {
