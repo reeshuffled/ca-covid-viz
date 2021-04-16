@@ -2,7 +2,7 @@ const map = L.map('map').setView([37.8, -96], 5);
 
 // control that shows state info on hover
 const info = L.control();
-
+const Prsninfo = L.control();
 const dateInput = document.getElementById("dateInput");
 
 // global variables
@@ -28,7 +28,7 @@ const prisons = [];
      
     // add the cases info box element
     addInfoBox();
-
+    addPrsnBox();
     // generate legend and add to map
     addMapLegend();
 
@@ -99,9 +99,11 @@ const prisons = [];
             onEachFeature: (feature, layer) => {
 
                 layer.on({
-
+                    mouseover: highlightPrisonFeature,
+                    mouseout: resetPrisonHighlight,    
                     //mouseover: highlightFeature
                     onclick: ("Fucks")
+
                 });
 
                 if (layer.feature.properties.kind == "prison"){
@@ -168,11 +170,31 @@ function addInfoBox() {
     info.update = function(props) {
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
             '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />'  + 
-            ' Data of data: <br /> ' + props.date + ' <br />': 'Hover over a county');
+            ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
     };
 
     info.addTo(map);
 }
+
+function addPrsnBox() {
+    Prsninfo.onAdd = function(map) {
+        this._div = L.DomUtil.create('div', 'info');
+
+        this.PrsnUpdate();
+
+        return this._div;
+    };
+
+    Prsninfo.PrsnUpdate = function(props) {
+        this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
+            '<b>' + props.name + '</b><br />' + (props.casesRes+props.casesStaff) + ' cases<br /> ' + (props.deathsRes+props.deathsStaff) + ' deaths<br />'  + 
+            (props.residentsRecovered+props.staffRecovered)+ ' recovered <br /> ' + props.popFebTwenty + 'total Population <br />' +
+            ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
+    };
+
+    Prsninfo.addTo(map);
+}
+
 
 /**
  * A function that queries the API for case data for a specific date.
@@ -343,12 +365,49 @@ function highlightFeature(e) {
 
     info.update(layer.feature.properties);
 }
+function highlightPrisonFeature(e) {
+    const layer = e.target;
+
+    layer.setStyle({
+        weight: 5,
+        color: '#666',
+        dashArray: '',
+        fillOpacity: 0.5
+    });
+
+    //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        //layer.bringToFront();
+    //}
+
+    // find the case data for the county
+    const prsnCaseData = cases.prison.find(x => x.prison == layer.feature.properties.name);
+
+    // set the layer feature properties if there is case data
+    
+    // update the county cases and death properties
+    layer.feature.properties.casesRes = prsnCaseData?.residentsConfirmed;
+    layer.feature.properties.casesStaff = prsnCaseData?.staffConfirmed;
+    layer.feature.properties.deathsRes = prsnCaseData?.residentsDeaths;
+    layer.feature.properties.deathsStaff = prsnCaseData?.staffDeaths;
+    layer.feature.properties.residentsRecovered = prsnCaseData?.residentsRecovered;
+    layer.feature.properties.staffRecovered = prsnCaseData?.staffRecovered;
+    layer.feature.properties.popFebTwenty = prsnCaseData?.popFebTwenty;
+    Prsninfo.PrsnUpdate(layer.feature.properties);
+}
+
 
 function resetHighlight(e) {
     geojson.resetStyle(e.target);
 
     info.update();
 }
+
+function resetPrisonHighlight(e) {
+    circle.resetStyle(e.target);
+
+    Prsninfo.update();
+}
+
 
 function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
