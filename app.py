@@ -4,7 +4,6 @@ import csv
 from datetime import datetime, timedelta
 import requests
 import json
-import requests
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
