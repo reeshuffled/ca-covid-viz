@@ -1,10 +1,8 @@
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-import csv
 from datetime import datetime, timedelta
-import requests
-import json
-import requests
+import csv, requests
+from geojson import Point, Feature, FeatureCollection, dump
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
@@ -221,39 +219,27 @@ def create_pointers():
 
         prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
 
-        # create DB objects for each CA entry from the CSV file
-    points = []
-    pairs = []
-    f = open("prisonData.js", "w")
-    f.write("var prisonData = {\"type\":\"FeatureCollection\",\"features\":\n")
-    f.close()
-    for entry in prison_data:
-        if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs:
-            points.append({
-                "type": "Feature",
-                "properties":
-                    {"kind":"prison",
-                    "name":entry[PRSN_NAME],
-                    "facilityID": entry[FACILITY_ID]
-                },
-                "geometry": {
-                    "type": "Point",
-                    "coordinates": [entry[PRSN_LAT],entry[PRSN_LON]],
-                #"totDeath": entry[PRSN_RES_DEATHS],
-                #"totConfirmed": entry[PRSN_RES_CONF],
-                #"totPopulation": entry[PRSN_RES_POP],
-                },
-                })
-            pairs.append([entry[PRSN_LAT],entry[PRSN_LON]])
-        
-        
-    myString = json.dumps(points)
-    f = open("prisonData.js", "a")
-    f.write(myString)
-    f.write("\n")
-    f.write("};")
-    f.close()
+    features = []
     
+    # create DB objects for each CA entry from the CSV file
+    pairs = []
+
+    for entry in prison_data:
+        if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs and entry[PRSN_LAT] != "NA":
+            point = Point((float(entry[PRSN_LON]), float(entry[PRSN_LAT])))
+
+            features.append(Feature(geometry=point, properties={
+                "kind": "prison",
+                "name": entry[PRSN_NAME],
+                "facilityID": entry[FACILITY_ID]
+            }))
+
+            pairs.append([entry[PRSN_LAT], entry[PRSN_LON]])
+                
+    feature_collection = FeatureCollection(features)
+
+    with open('myfile.geojson', 'w') as f:
+        dump(feature_collection, f)
         
 
 def init_db():
