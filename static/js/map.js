@@ -81,7 +81,21 @@ const prisons = [];
         }
     }).addTo(map);
 
+    var geojsonMarkerOptions = {
+        radius: 10,
+        fillColor: "#0",
+        color: "#000",
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 0.5
+    };
+
     L.geoJson(prisonData, {
+
+        pointToLayer: function (feature, latlng) {
+            return L.circleMarker(latlng, geojsonMarkerOptions);
+        },
+
         onEachFeature: (feature, layer) => {
             layer.on({
                 mouseover: highlightPrisonFeature,
@@ -91,13 +105,8 @@ const prisons = [];
 
             const [ lat, lng ] = feature.geometry.coordinates;
 
-            L.circle([lat, lng], {
-                color: 'black',
-                fillColor: '#000000',
-                fillOpacity: .4,
-                radius: 1000
-            }).addTo(map);
-        }
+        },
+        
     }).addTo(map);
 
     // add the markers for prisons to the map
@@ -192,8 +201,12 @@ function addPrsnBox() {
     };
 
     Prsninfo.PrsnUpdate = function(props) {
+
+
+        console.log(props)
+
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-            '<b>' + props.name + '</b><br />' + (props.casesRes+props.casesStaff) + ' cases<br /> ' + (props.deathsRes+props.deathsStaff) + ' deaths<br />'  + 
+            '<b>' + props.name +'</b><br />' + props.id + ' cases<br /> ' + (props.residentsDeaths+props.staffDeaths) + ' deaths<br />'  + 
             (props.residentsRecovered+props.staffRecovered)+ ' recovered <br /> ' + props.popFebTwenty + 'total Population <br />' +
             ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
     };
