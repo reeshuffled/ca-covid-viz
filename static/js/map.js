@@ -306,14 +306,14 @@ function getFillColorByCases(d) {
  * @param {Number} d 
  * @returns {String} color
  */
- function getFillColorByCases(d) {
-    return d > 1000000 ? '#800026' :
-            d > 80000  ? '#BD0026' :
-            d > 60000  ? '#E31A1C' :
-            d > 40000  ? '#FC4E2A' :
-            d > 20000   ? '#FD8D3C' :
-            d > 15000   ? '#FEB24C' :
-            d > 10000   ? '#FED976' :
+ function getPrisonColorCapita(d) {
+    return d > .5 ? '#800026' :
+            d > .4  ? '#BD0026' :
+            d > .3  ? '#E31A1C' :
+            d > .2  ? '#FC4E2A' :
+            d > .1   ? '#FD8D3C' :
+            d > .05   ? '#FEB24C' :
+            d > .025   ? '#FED976' :
                         '#FFEDA0';
 }
 
