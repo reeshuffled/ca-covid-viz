@@ -14,3 +14,4 @@ six==1.15.0
 virtualenv==20.4.2
 Werkzeug==1.0.1
 requests==2.25.1
+geojson==2.5.0
