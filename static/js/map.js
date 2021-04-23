@@ -169,6 +169,7 @@ function addPrsnBox() {
     };
 
     prisonInfoBox.update = function(props) {
+        // ToDo: Create an if statement for NaN for casesRes, casesStaff, deathsRes, deathsStaff, resRecovered, staffRecovered, popFebTwenty and adjust innerHTML accordingly
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
             '<b>' + props.name +'</b><br />' + props.id + ' cases<br /> ' + (props.residentsDeaths+props.staffDeaths) + ' deaths<br />'  + 
             (props.residentsRecovered+props.staffRecovered)+ ' recovered <br /> ' + props.popFebTwenty + 'total Population <br />' +
