@@ -169,10 +169,21 @@ function addPrsnBox() {
     };
 
     prisonInfoBox.update = function(props) {
+
+        console.log(props)
+
+        if(props){
+            var cases = parseInt(props.residentsConfirmed, 10) + parseInt(props.staffConfirmed, 10)
+            console.log(parseInt(props.residentsConfirmed, 10))
+            console.log(parseInt(props.staffConfirmed, 10))
+            console.log(cases)
+        }
+
         // ToDo: Create an if statement for NaN for casesRes, casesStaff, deathsRes, deathsStaff, resRecovered, staffRecovered, popFebTwenty and adjust innerHTML accordingly
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-            '<b>' + props.name +'</b><br />' + props.id + ' cases<br /> ' + (props.residentsDeaths+props.staffDeaths) + ' deaths<br />'  + 
-            (props.residentsRecovered+props.staffRecovered)+ ' recovered <br /> ' + props.popFebTwenty + 'total Population <br />' +
+            '<b>' + props.name +'</b><br />' + props.residentsConfirmed + ' resident cases<br /> ' + props.staffConfirmed + ' staff cases<br />'  + 
+            props.residentsDeaths + ' resident deaths<br />' + props.staffDeaths + ' staff deaths<br />' + props.residentsRecovered + ' resident recovered <br /> ' +
+            props.staffRecovered + ' staff recovered <br /> ' + props.popFebTwenty + ' total Population <br />' +
             ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
     };
 
@@ -373,12 +384,14 @@ function highlightPrisonFeature(e) {
     if (prsnCaseData)
     {
         layer.feature.properties.residentsConfirmed = prsnCaseData?.residentsConfirmed;
-        layer.feature.properties.casesStaff = prsnCaseData?.casesStaff;
-        layer.feature.properties.deathsRes = prsnCaseData?.deathsRes;
-        layer.feature.properties.deathsStaff = prsnCaseData?.deathsStaff;
+        layer.feature.properties.staffConfirmed = prsnCaseData?.staffConfirmed;
+        layer.feature.properties.residentsDeaths = prsnCaseData?.residentsDeaths;
+        layer.feature.properties.staffDeaths = prsnCaseData?.staffDeaths;
         layer.feature.properties.residentsRecovered = prsnCaseData?.residentsRecovered;
         layer.feature.properties.staffRecovered = prsnCaseData?.staffRecovered;
         layer.feature.properties.popFebTwenty = prsnCaseData?.popFebTwenty;
+        layer.feature.properties.date = prsnCaseData?.date;
+
     }
         
     // update the county cases and death properties
