@@ -1,16 +1,14 @@
 const map = L.map('map').setView([37.8, -96], 5);
 
 // control that shows state info on hover
-const info = L.control();
-const Prsninfo = L.control();
+const countyInfoBox = L.control();
+const prisonInfoBox = L.control();
 const dateInput = document.getElementById("dateInput");
 
 // global variables
-let geojson;
-let marker;
+let countiesGeoJson, prisonsGeoJson;
 let cases = [];
-const counties = [];
-const prisons = [];
+const counties = [], prisons = [];
 
 /**
  * Initialize the UI components.
@@ -44,7 +42,7 @@ const prisons = [];
     await getCasesByDate(`${today.getFullYear()}-${today.getMonth() + 1}-${today.getDate()}`);
 
     // load the state GeoJSON data
-    geojson = L.geoJson(statesData, {
+    countiesGeoJson = L.geoJson(statesData, {
         style: getCountyStyle,
         onEachFeature: (feature, layer) => {
             // bind mouseo and click events for highlighting and zooming
@@ -81,7 +79,17 @@ const prisons = [];
         }
     }).addTo(map);
 
-    L.geoJson(prisonData, {
+    prisonsGeoJson = L.geoJson(prisonData, {
+        pointToLayer: (feature, latlng) => {
+            return L.circleMarker(latlng, {
+                radius: 10,
+                fillColor: "#0",
+                color: "#000",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.5
+            });
+        },
         onEachFeature: (feature, layer) => {
             layer.on({
                 mouseover: highlightPrisonFeature,
@@ -89,39 +97,8 @@ const prisons = [];
                 //mouseover: highlightFeature
             });
 
-            const [ lat, lng ] = feature.geometry.coordinates;
-
-            L.circle([lat, lng], {
-                color: 'black',
-                fillColor: '#000000',
-                fillOpacity: .4,
-                radius: 1000
-            }).addTo(map);
         }
     }).addTo(map);
-
-    // add the markers for prisons to the map
-    // prisonData.features.forEach(feature => {
-    //     // get latitude and longitude coordinates
-    //     const [ lat, lng ] = feature.geometry.coordinates;
-        
-    //     // add radius around prison
-    //     var circle = L.circle([lat, lng], {
-    //         color: 'black',
-    //         fillColor: '#000000',
-    //         fillOpacity: .4,
-    //         radius: 1000
-    //     }).addTo(map);
-
-    //     // add marker for location of prison
-    //     const radius = L.circle([lat, lng], {
-    //         onEachFeature: (feature, layer) => {
-
-    //             layer.on({
-    //                 mouseover: highlightPrisonFeature,
-    //                 mouseout: resetPrisonHighlight,    
-    //                 //mouseover: highlightFeature
-    //             });
 
     //             if (layer.feature.properties.kind == "prison"){
     //                 // add the feature to the counties array
@@ -165,7 +142,7 @@ const prisons = [];
  * Add the cases info box element.
  */
 function addInfoBox() {
-    info.onAdd = function(map) {
+    countyInfoBox.onAdd = function(map) {
         this._div = L.DomUtil.create('div', 'info');
 
         this.update();
@@ -173,33 +150,37 @@ function addInfoBox() {
         return this._div;
     };
 
-    info.update = function(props) {
+    countyInfoBox.update = function(props) {
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
             '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />'  + 
             ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
     };
 
-    info.addTo(map);
+    countyInfoBox.addTo(map);
 }
 
 function addPrsnBox() {
-    Prsninfo.onAdd = function(map) {
+    prisonInfoBox.onAdd = function(map) {
         this._div = L.DomUtil.create('div', 'info');
 
-        this.PrsnUpdate();
+        this.update();
 
         return this._div;
     };
 
+<<<<<<< HEAD
     Prsninfo.PrsnUpdate = function(props) {
-        // ToDo: Create an if statement for NaN for casesRes, casesStaff, deathsRes, deathsStaff, resRecovered, staffRecovered, popFebTwenty and adjust innerHTML accordingly
+        
+=======
+    prisonInfoBox.update = function(props) {
+>>>>>>> 787f295df6b7af41844a11454d49d8d69950ffec
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-            '<b>' + props.name + '</b><br />' + (props.casesRes+props.casesStaff) + ' cases<br /> ' + (props.deathsRes+props.deathsStaff) + ' deaths<br />'  + 
+            '<b>' + props.name +'</b><br />' + props.id + ' cases<br /> ' + (props.residentsDeaths+props.staffDeaths) + ' deaths<br />'  + 
             (props.residentsRecovered+props.staffRecovered)+ ' recovered <br /> ' + props.popFebTwenty + 'total Population <br />' +
             ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
     };
 
-    Prsninfo.addTo(map);
+    prisonInfoBox.addTo(map);
 }
 
 
@@ -254,7 +235,7 @@ async function getCasesByDate(date) {
             county.layer.setStyle(getCountyStyle(county.feature));
         }
 
-        info.update(county.layer.feature.properties);
+        countyInfoBox.update(county.layer.feature.properties);
     });
 }
 
@@ -370,8 +351,9 @@ function highlightFeature(e) {
     layer.feature.properties.cases = caseData?.cases;
     layer.feature.properties.deaths = caseData?.deaths;
 
-    info.update(layer.feature.properties);
+    countyInfoBox.update(layer.feature.properties);
 }
+
 function highlightPrisonFeature(e) {
     const layer = e.target;
 
@@ -387,34 +369,37 @@ function highlightPrisonFeature(e) {
     //}
 
     // find the case data for the county
-    const prsnCaseData = cases.prison.find(x => x.prison == layer.feature.properties.name);
+    const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name);
+
+    console.log(prsnCaseData);
 
     // set the layer feature properties if there is case data
-    
+    if (prsnCaseData)
+    {
+        layer.feature.properties.residentsConfirmed = prsnCaseData?.residentsConfirmed;
+        layer.feature.properties.casesStaff = prsnCaseData?.casesStaff;
+        layer.feature.properties.deathsRes = prsnCaseData?.deathsRes;
+        layer.feature.properties.deathsStaff = prsnCaseData?.deathsStaff;
+        layer.feature.properties.residentsRecovered = prsnCaseData?.residentsRecovered;
+        layer.feature.properties.staffRecovered = prsnCaseData?.staffRecovered;
+        layer.feature.properties.popFebTwenty = prsnCaseData?.popFebTwenty;
+    }
+        
     // update the county cases and death properties
-    layer.feature.properties.casesRes = prsnCaseData?.residentsConfirmed;
-    layer.feature.properties.casesStaff = prsnCaseData?.staffConfirmed;
-    layer.feature.properties.deathsRes = prsnCaseData?.residentsDeaths;
-    layer.feature.properties.deathsStaff = prsnCaseData?.staffDeaths;
-    layer.feature.properties.residentsRecovered = prsnCaseData?.residentsRecovered;
-    layer.feature.properties.staffRecovered = prsnCaseData?.staffRecovered;
-    layer.feature.properties.popFebTwenty = prsnCaseData?.popFebTwenty;
-    Prsninfo.PrsnUpdate(layer.feature.properties);
+    prisonInfoBox.update(layer.feature.properties);
 }
 
-
 function resetHighlight(e) {
-    geojson.resetStyle(e.target);
+    countiesGeoJson.resetStyle(e.target);
 
-    info.update();
+    countyInfoBox.update();
 }
 
 function resetPrisonHighlight(e) {
-    circle.resetStyle(e.target);
+    prisonsGeoJson.resetStyle(e.target);
 
-    Prsninfo.update();
+    prisonInfoBox.update();
 }
-
 
 function zoomToFeature(e) {
     map.fitBounds(e.target.getBounds());
