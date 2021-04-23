@@ -251,13 +251,14 @@ def init_db():
 
     cr = csv.reader(decoded_content.splitlines(), delimiter=',')
 
-    cali_data = list(filter(lambda x: x[STATE_INDEX] == "California", cr))
+    cali_data = list(cr)
 
     for entry in cali_data:
         # record county name, daily cases, and daily deaths
         data = {
             "date": entry[DATE_INDEX],
             "county": entry[COUNTY_INDEX],
+            "state": entry[STATE_INDEX],
             "cases": entry[CASES_INDEX],
             "deaths": entry[DEATHS_INDEX]
         }
