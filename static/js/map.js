@@ -168,12 +168,7 @@ function addPrsnBox() {
         return this._div;
     };
 
-<<<<<<< HEAD
-    Prsninfo.PrsnUpdate = function(props) {
-        
-=======
     prisonInfoBox.update = function(props) {
->>>>>>> 787f295df6b7af41844a11454d49d8d69950ffec
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
             '<b>' + props.name +'</b><br />' + props.id + ' cases<br /> ' + (props.residentsDeaths+props.staffDeaths) + ' deaths<br />'  + 
             (props.residentsRecovered+props.staffRecovered)+ ' recovered <br /> ' + props.popFebTwenty + 'total Population <br />' +
