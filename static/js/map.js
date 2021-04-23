@@ -277,7 +277,7 @@ function addMapLegend() {
                 from + (to ? '&ndash;' + to : '+'));
         }
 
-        div.innerHTML = labels.join('<br>');
+        div.innerHTML +=  'Prison <div id="circle"></div><br>' + labels.join('<br>');
 
         return div;
     };
