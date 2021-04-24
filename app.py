@@ -29,6 +29,7 @@ class Day(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     date = db.Column(db.String(80))
     county = db.Column(db.String(80))
+    state = db.Column(db.String(80))
     cases = db.Column(db.Integer)
     deaths = db.Column(db.Integer)
 
@@ -102,6 +103,7 @@ def get_data_by_date():
         entry = {
             "date": result.date,
             "county": result.county,
+            "state": result.state,
             "cases": result.cases,
             "deaths": result.deaths
         }
@@ -241,7 +243,9 @@ def create_pointers():
     with open('myfile.geojson', 'w') as f:
         dump(feature_collection, f)
         
-
+def create_geojsons():
+    #create the Geojsons for all states
+    return 0
 def init_db():
     db.create_all()
 
