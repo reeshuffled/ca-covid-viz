@@ -250,3 +250,37 @@ def init_db():
 
         # save the new student in the database
         db.session.commit()
+
+def conv_states_to_file():
+
+    basepath = './USA' # maybe just '.'
+
+    print(os.listdir(basepath))
+
+    for dir_name in os.listdir(basepath):
+
+        dir_path = os.path.join(basepath, dir_name)
+
+        print(dir_path)
+
+        if not os.path.isdir(dir_path):
+            continue
+
+        with open('states.geo.json' , 'a') as outfile:
+
+
+            for file_name in os.listdir(dir_path):
+                if not file_name.endswith('.txt'):
+                    continue
+
+                file_path = os.path.join(dir_path, file_name)
+
+                print(file_path)
+
+                with open(file_path) as infile:
+
+                    for line in infile:
+
+                        outfile.write(line)
+
+                outfile.write(',')
