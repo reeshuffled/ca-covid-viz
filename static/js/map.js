@@ -184,7 +184,7 @@ function addPrsnBox() {
             '<b>' + props.name +'</b><br />' + props.residentsConfirmed + ' resident cases<br /> ' + props.staffConfirmed + ' staff cases<br />'  + 
             props.residentsDeaths + ' resident deaths<br />' + props.staffDeaths + ' staff deaths<br />' + props.residentsRecovered + ' resident recovered <br /> ' +
             props.staffRecovered + ' staff recovered <br /> ' + props.popFebTwenty + ' total Population <br />' +
-            ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
+            ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a prison');
     };
 
     prisonInfoBox.addTo(map);
@@ -277,7 +277,7 @@ function addMapLegend() {
                 from + (to ? '&ndash;' + to : '+'));
         }
 
-        div.innerHTML +=  '<table><tr><td><div id="circle"></div></td><td>Prison</td></tr></table>' + labels.join('<br>');
+        div.innerHTML +=  '<h4>Legend</h4> <table><tr><td><div id="circle"></div></td><td>Prison</td></tr></table>' + labels.join('<br>');
 
         return div;
     };
