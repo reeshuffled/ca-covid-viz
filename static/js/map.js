@@ -365,10 +365,11 @@ function highlightPrisonFeature(e) {
     const layer = e.target;
 
     layer.setStyle({
-        weight: 5,
-        color: '#666',
+        weight: 4,
+        color: '#FFFACD',
         dashArray: '',
-        fillOpacity: 0.5
+        fillOpacity: 0.75,
+        fillColor: '#ADD8E6'
     });
 
     //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
