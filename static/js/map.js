@@ -180,7 +180,7 @@ function addPrsnBox() {
         }
 
         // ToDo: Create an if statement for NaN for casesRes, casesStaff, deathsRes, deathsStaff, resRecovered, staffRecovered, popFebTwenty and adjust innerHTML accordingly
-        this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
+        this._div.innerHTML = '<h4>Prison Cases</h4>' +  (props ?
             '<b>' + props.name +'</b><br />' + props.residentsConfirmed + ' resident cases<br /> ' + props.staffConfirmed + ' staff cases<br />'  + 
             props.residentsDeaths + ' resident deaths<br />' + props.staffDeaths + ' staff deaths<br />' + props.residentsRecovered + ' resident recovered <br /> ' +
             props.staffRecovered + ' staff recovered <br /> ' + props.popFebTwenty + ' total Population <br />' +
