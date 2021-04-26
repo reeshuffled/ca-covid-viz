@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timedelta
 import csv, requests
 from geojson import Point, Feature, FeatureCollection, dump
+import os
 
 # initialize Flask application
 app = Flask(__name__, static_url_path="")
