@@ -97,45 +97,46 @@ const counties = [], prisons = [];
                 //mouseover: highlightFeature
             });
 
+            if (layer.feature.properties.kind == "prison")
+            {
+                // add the feature to the counties array
+                prisons.push({
+                    layer: layer,
+                    feature: layer.feature
+                });
+
+                // find the case data for the county
+                const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name);
+
+                // if there is case data found for the county
+                if (prsnCaseData != null)
+                {
+                    // update the county cases and death properties
+                    layer.feature.properties.date = prsnCaseData.date;
+                    layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
+                    layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
+
+                    layer.feature.properties.deathsRes = prsnCaseData.residentsDeaths;
+                    layer.feature.properties.deathsStaff = prsnCaseData.staffDeaths;
+
+                    layer.feature.properties.residentsRecovered = prsnCaseData.residentsRecovered;
+                    layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
+
+                    layer.feature.properties.popFebTwenty = prsnCaseData.popFebTwenty;
+                    layer.feature.properties.residentsPopulation = prsnCaseData.residentsPopulation;
+
+                    layer.feature.properties.county = prsnCaseData.county;
+                    layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
+
+                    lat = prsnCaseData.latitude;
+                    lng = prsnCaseData.longitude;
+
+                    // update the style because the case data changed
+                    layer.setStyle(getPrisonStyle(feature));
+                }
+            }
         }
     }).addTo(map);
-
-    //             if (layer.feature.properties.kind == "prison"){
-    //                 // add the feature to the counties array
-    //                 prisons.push({
-    //                     layer: layer,
-    //                     feature: layer.feature
-    //                 });
-
-    //                 // find the case data for the county
-    //                 const prsnCaseData = cases.prison.find(x => x.prison == layer.feature.properties.name);
-
-    //                 // if there is case data found for the county
-    //                 if (prsnCaseData != null){
-    //                     // update the county cases and death properties
-    //                     layer.feature.properties.date = prsnCaseData.date;
-    //                     layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
-    //                     layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
-
-    //                     layer.feature.properties.deathsRes = prsnCaseData.residentsDeaths;
-    //                     layer.feature.properties.deathsStaff = prsnCaseData.staffDeaths;
-
-    //                     layer.feature.properties.residentsRecovered = prsnCaseData.residentsRecovered;
-    //                     layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
-
-    //                     layer.feature.properties.popFebTwenty = prsnCaseData.popFebTwenty;
-    //                     layer.feature.properties.residentsPopulation = prsnCaseData.residentsPopulation;
-
-    //                     layer.feature.properties.county = prsnCaseData.county;
-    //                     layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
-
-    //                     lat = prsnCaseData.latitude;
-    //                     lng = prsnCaseData.longitude;
-
-    //                     // update the style because the case data changed
-    //                     //layer.setStyle(getCountyStyle(feature));
-    //                 }
-    //             }
 })();
 
 /**
@@ -169,14 +170,9 @@ function addPrsnBox() {
     };
 
     prisonInfoBox.update = function(props) {
-
-        console.log(props)
-
-        if(props){
+        if (props)
+        {
             var cases = parseInt(props.residentsConfirmed, 10) + parseInt(props.staffConfirmed, 10)
-            console.log(parseInt(props.residentsConfirmed, 10))
-            console.log(parseInt(props.staffConfirmed, 10))
-            console.log(cases)
         }
 
         // ToDo: Create an if statement for NaN for casesRes, casesStaff, deathsRes, deathsStaff, resRecovered, staffRecovered, popFebTwenty and adjust innerHTML accordingly
@@ -333,6 +329,21 @@ function getCountyStyle(feature) {
     };
 }
 
+function getPrisonStyle(feature) {
+    // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
+    const numResidents = feature.properties.residentsPopulation ? feature.properties.residentsPopulation : 
+        feature.properties.popFebTwenty  ? feature.properties.popFebTwenty  : "NA";
+
+    return {
+        weight: 2,
+        opacity: 1,
+        color: 'white',
+        dashArray: '3',
+        fillOpacity: 0.5,
+        fillColor: numResidents == "NA" ? "#0" : getFillColorByCases(feature.properties.casesRes / numResidents)
+    };
+}
+
 /**
  * Highlight a feature on hover.
  * @param {Event} e 
@@ -379,8 +390,6 @@ function highlightPrisonFeature(e) {
     // find the case data for the county
     const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name);
 
-    console.log(prsnCaseData);
-
     // set the layer feature properties if there is case data
     if (prsnCaseData)
     {
@@ -392,7 +401,6 @@ function highlightPrisonFeature(e) {
         layer.feature.properties.staffRecovered = prsnCaseData?.staffRecovered;
         layer.feature.properties.popFebTwenty = prsnCaseData?.popFebTwenty;
         layer.feature.properties.date = prsnCaseData?.date;
-
     }
         
     // update the county cases and death properties
