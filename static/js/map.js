@@ -132,7 +132,13 @@ const counties = [], prisons = [];
                     lng = prsnCaseData.longitude;
 
                     // update the style because the case data changed
-                    layer.setStyle(getPrisonStyle(feature));
+                    layer.setStyle({
+                        weight: 2,
+                        opacity: 1,
+                        color: 'white',
+                        fillOpacity: 0.5,
+                        fillColor: getPrisonColor(feature)
+                    });
                 }
             }
         }
@@ -344,6 +350,14 @@ function getPrisonStyle(feature) {
     };
 }
 
+function getPrisonColor(feature) {
+    // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
+    const numResidents = feature.properties.residentsPopulation ? feature.properties.residentsPopulation : 
+     feature.properties.popFebTwenty  ? feature.properties.popFebTwenty  : "NA";
+
+    return numResidents == "NA" ? "#0" : getFillColorByCases(feature.properties.casesRes / numResidents);
+}
+
 /**
  * Highlight a feature on hover.
  * @param {Event} e 
@@ -377,10 +391,10 @@ function highlightPrisonFeature(e) {
 
     layer.setStyle({
         weight: 4,
-        color: '#FFFACD',
-        dashArray: '',
+        color: '#666',
+        dashArray: 4,
         fillOpacity: 0.75,
-        fillColor: '#ADD8E6'
+        fillColor: getPrisonColor(layer.feature)
     });
 
     //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -414,7 +428,15 @@ function resetHighlight(e) {
 }
 
 function resetPrisonHighlight(e) {
-    prisonsGeoJson.resetStyle(e.target);
+    const layer = e.target;
+
+    layer.setStyle({
+        weight: 2,
+        color: 'white',
+        dashArray: 0,
+        fillOpacity: 0.75,
+        fillColor: getPrisonColor(layer.feature)
+    });
 
     prisonInfoBox.update();
 }
