@@ -335,27 +335,28 @@ function getCountyStyle(feature) {
     };
 }
 
-function getPrisonStyle(feature) {
-    // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
-    const numResidents = feature.properties.residentsPopulation ? feature.properties.residentsPopulation : 
-        feature.properties.popFebTwenty  ? feature.properties.popFebTwenty  : "NA";
-
-    return {
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.75,
-        fillColor: numResidents == "NA" ? "#0" : getFillColorByCases(feature.properties.casesRes / numResidents)
-    };
-}
-
 function getPrisonColor(feature) {
     // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
-    const numResidents = feature.properties.residentsPopulation ? feature.properties.residentsPopulation : 
-     feature.properties.popFebTwenty  ? feature.properties.popFebTwenty  : "NA";
+    let numResidents = "NA";
 
-    return numResidents == "NA" ? "#0" : getFillColorByCases(feature.properties.casesRes / numResidents);
+    // prefer resident population if reported
+    if (feature.properties.residentsPopulation)
+    {
+        if (feature.properties.residentsPopulation != "NA")
+        {
+            numResidents = feature.properties.residentsPopulation;
+        }
+        // fallback feb 1, 2020 population count
+        else if (feature.properties.popFebTwenty)
+        {
+            if (feature.properties.popFebTwenty != "NA")
+            {
+                numResidents = feature.properties.popFebTwenty;
+            }
+        }
+    }
+
+    return numResidents == "NA" ? "#0" : getPrisonColorCapita(feature.properties.casesRes / numResidents);
 }
 
 /**
