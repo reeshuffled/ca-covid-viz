@@ -309,14 +309,13 @@ function getFillColorByCases(d) {
  * @returns {String} color
  */
  function getPrisonColorCapita(d) {
-    return d > .5 ? '#800026' :
-            d > .4  ? '#BD0026' :
-            d > .3  ? '#E31A1C' :
-            d > .2  ? '#FC4E2A' :
-            d > .1   ? '#FD8D3C' :
-            d > .05   ? '#FEB24C' :
-            d > .025   ? '#FED976' :
-                        '#FFEDA0';
+    return d > .5 ? '#0' :
+            d > .4 ? '#2F4F4F' :
+            d > .3  ? '#696969' :
+            d > .2  ? '#808080' :
+            d > .1 ? '#A9A9A9' :
+            d > .05 ? '#D3D3D3' :
+                        '#1E90FF';
 }
 
 /**
@@ -368,8 +367,7 @@ function highlightFeature(e) {
 
     layer.setStyle({
         weight: 5,
-        color: '#666',
-        dashArray: '',
+        color: '#8A2BE2',
         fillOpacity: 0.5
     });
 
@@ -392,10 +390,10 @@ function highlightPrisonFeature(e) {
 
     layer.setStyle({
         weight: 4,
-        color: '#666',
+        color: '#8A2BE2',
         dashArray: 4,
         fillOpacity: 0.5,
-        fillColor: getPrisonColor(layer.feature)
+        fillColor: '#F0FFFF'
     });
 
     //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
