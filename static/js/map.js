@@ -280,7 +280,7 @@ function addMapLegend() {
                 from + (to ? '&ndash;' + to : '+'));
         }
 
-        div.innerHTML +=  '<h4>Counties Legend</h4>' + labels.join('<br>');
+        div.innerHTML +=  '<h4>Counties Legend</h4> ' + labels.join('<br>');
 
         return div;
     };
@@ -298,45 +298,34 @@ function addMapLegend() {
     myLegend.onAdd = function (map) {
         var div = L.DomUtil.create('div', 'info legend'),
             grades = [
-                "no data",
-                "5%",
-                "10%",
-                "20%",
-                "30%",
-                "40%",
-                "50%"
-            ],
-            labels = [],
-            from, to;
-            grades = [
                 0,
                 .05,
                 .1,
                 .2,
                 .3,
                 .4,
-                50
+                .5
             ],
             labels = [],
             from, to;
 
-        for (var i = 0; i < grades.length; i++) {
-            from = grades[i];
-            to = grades[i + 1];
-
-            labels.push(
-                '<i style="background:' + getPrisonColorCapita(from + 1) + '"></i> ' +
-                from + (to ? '&ndash;' + to : '+'));
-        }
-
-        div.innerHTML +=  '<h4>Prison Percentages</h4> <table><tr><td><div id="circle"></div></td><td>Prison</td></tr></table>' + labels.join('<br>');
-
-        return div;
-    };
-
-    myLegend.addTo(map);
-}
-
+            for (var i = 0; i < grades.length; i++) {
+                from = grades[i];
+                to = grades[i + 1];
+    
+                labels.push(
+                    '<i style="background:' + getPrisonColorCapita(from + 1) + '"></i> ' +
+                    from + (to ? '&ndash;' + to : '+'));
+            }
+    
+            div.innerHTML +=  '<h4>Prison Legend</h4> ' + labels.join('<br>');
+    
+            return div;
+        };
+    
+        myLegend.addTo(map);
+    }
+    
 
 /**
  * Get the corresponding color for a daily case number within a range.
