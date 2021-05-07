@@ -93,9 +93,7 @@ def get_data_by_date():
 
     # rollback/forward to data within the database
     date = datetime.strptime(county_date, "%Y-%m-%d")
-    if date < earliest_date_obj:
-        county_date = earliest_date
-    elif date > latest_date_obj:
+    if date > latest_date_obj:
         county_date = latest_date
 
     county_results = Day.query.filter_by(date=county_date).all()
@@ -104,6 +102,9 @@ def get_data_by_date():
     while len(list(county_results)) == 0:
         # convert the date string to a datetime object
         date_obj = datetime.strptime(county_date, "%Y-%m-%d")
+
+        if date_obj < earliest_date_obj:
+            break
 
         # roll back one day and convert back to string
         date_obj -= timedelta(days=1)
@@ -128,11 +129,9 @@ def get_data_by_date():
     # get existing student object by id from request data
     prison_date = request.json["date"]
 
-    # rollback/forward to data within the database
+    # rollback to data within the database
     date = datetime.strptime(prison_date, "%Y-%m-%d")
-    if date < earliest_date_obj:
-        prison_date = earliest_date
-    elif date > latest_date_obj:
+    if date > latest_date_obj:
         prison_date = latest_date
 
     prison_results = Prison.query.filter_by(date=prison_date).all()
@@ -141,6 +140,9 @@ def get_data_by_date():
     while len(list(prison_results)) == 0:
         # convert the date string to a datetime object
         date_obj = datetime.strptime(prison_date, "%Y-%m-%d")
+
+        if date_obj < earliest_date_obj:
+            break
 
         # roll back one day and convert back to string
         date_obj -= timedelta(days=1)

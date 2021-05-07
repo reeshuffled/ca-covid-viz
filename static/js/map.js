@@ -199,6 +199,9 @@ function addPrsnBox() {
  * @param {String} date
  */
 async function getCasesByDate(date) {
+    // make sure a date is valid before doing anything
+    if (new Date(date) == "Invalid Date") return;
+
     // make a POST request to the /date endpoint of the Flask server
     const request = await fetch("/date", {
         method: "POST",
@@ -244,8 +247,54 @@ async function getCasesByDate(date) {
             // update the style because the case data changed
             county.layer.setStyle(getCountyStyle(county.feature));
         }
+        else
+        {
+            county.feature.properties.cases = 0;
+            county.feature.properties.deaths = 0;
+            county.feature.properties.date = response.date;
+
+            // update the style because the case data changed
+            county.layer.setStyle(getCountyStyle(county.feature));
+        }
 
         countyInfoBox.update(county.layer.feature.properties);
+    });
+
+    prisons.forEach(prison => {
+        const layer = prison.layer;
+        const feature = prison.feature;
+
+        // find the case data for the county
+        const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name) || {};
+
+        // update the county cases and death properties
+        layer.feature.properties.date = prsnCaseData.date;
+        layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
+        layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
+
+        layer.feature.properties.deathsRes = prsnCaseData.residentsDeaths;
+        layer.feature.properties.deathsStaff = prsnCaseData.staffDeaths;
+
+        layer.feature.properties.residentsRecovered = prsnCaseData.residentsRecovered;
+        layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
+
+        layer.feature.properties.popFebTwenty = prsnCaseData.popFebTwenty;
+        layer.feature.properties.residentsPopulation = prsnCaseData.residentsPopulation;
+
+        layer.feature.properties.county = prsnCaseData.county;
+        layer.feature.properties.staffRecovered = prsnCaseData.staffRecovered;
+
+        lat = prsnCaseData.latitude;
+        lng = prsnCaseData.longitude;
+
+        // update the style because the case data changed
+        layer.setStyle({
+            weight: 2,
+            opacity: 1,
+            color: 'white',
+            fillOpacity: 0.5,
+            fillColor: getPrisonColor(feature)
+        });
     });
 }
 
