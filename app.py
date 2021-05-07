@@ -82,8 +82,22 @@ def get_data_by_date():
     if "date" not in request.json:
         return "You need to supply a date in your request JSON body.", 400 
 
+    # get the latest and ealier dates in the database
+    earliest_date = Day.query.order_by(Day.id)[1].date
+    latest_date = Day.query.order_by(-Day.id).first().date
+    earliest_date_obj = datetime.strptime(earliest_date, "%Y-%m-%d")
+    latest_date_obj = datetime.strptime(latest_date, "%Y-%m-%d") 
+
     # get existing student object by id from request data
     county_date = request.json["date"]
+
+    # rollback/forward to data within the database
+    date = datetime.strptime(county_date, "%Y-%m-%d")
+    if date < earliest_date_obj:
+        county_date = earliest_date
+    elif date > latest_date_obj:
+        county_date = latest_date
+
     county_results = Day.query.filter_by(date=county_date).all()
 
     # roll back date until there are entries in the DB
@@ -113,6 +127,14 @@ def get_data_by_date():
 
     # get existing student object by id from request data
     prison_date = request.json["date"]
+
+    # rollback/forward to data within the database
+    date = datetime.strptime(prison_date, "%Y-%m-%d")
+    if date < earliest_date_obj:
+        prison_date = earliest_date
+    elif date > latest_date_obj:
+        prison_date = latest_date
+
     prison_results = Prison.query.filter_by(date=prison_date).all()
 
     # roll back date until there are entries in the DB
