@@ -345,7 +345,7 @@ function addMapLegend() {
     const myLegend = L.control({position: 'bottomleft'});
 
     myLegend.onAdd = function (map) {
-        var div = L.DomUtil.create('div', 'info legend'),
+        const div = L.DomUtil.create('div', 'info legend'),
             grades = [
                 0,
                 .05,
@@ -355,15 +355,15 @@ function addMapLegend() {
                 .4,
                 .5
             ],
-            labels = [],
-            from, to;
+            labels = [];
+            let from, to;
 
             for (var i = 0; i < grades.length; i++) {
                 from = grades[i];
                 to = grades[i + 1];
     
                 labels.push(
-                    '<i style="background:' + getPrisonColorCapita(from + 1) + '"></i> ' +
+                    '<i style="background:' + getPrisonColorCapita(from) + '"></i> ' +
                     from + (to ? '&ndash;' + to : '+'));
             }
     
