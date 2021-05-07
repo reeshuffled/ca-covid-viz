@@ -88,7 +88,7 @@ const counties = [], prisons = [];
                 color: "#000",
                 weight: 1,
                 opacity: 1,
-                fillOpacity: 0.5
+                fillOpacity: 1
             });
         },
         onEachFeature: (feature, layer) => {
@@ -137,7 +137,7 @@ const counties = [], prisons = [];
                         weight: 2,
                         opacity: 1,
                         color: 'white',
-                        fillOpacity: 0.5,
+                        fillOpacity: 1,
                         fillColor: getPrisonColor(feature)
                     });
                 }
@@ -292,7 +292,7 @@ async function getCasesByDate(date) {
             weight: 2,
             opacity: 1,
             color: 'white',
-            fillOpacity: 0.5,
+            fillOpacity: 1,
             fillColor: getPrisonColor(feature)
         });
     });
@@ -493,7 +493,7 @@ function highlightPrisonFeature(e) {
         weight: 4,
         color: '#8A2BE2',
         dashArray: 4,
-        fillOpacity: 0.5,
+        fillOpacity: 1,
         fillColor: '#F0FFFF'
     });
 
@@ -534,7 +534,7 @@ function resetPrisonHighlight(e) {
         weight: 2,
         color: 'white',
         dashArray: 0,
-        fillOpacity: 0.5,
+        fillOpacity: 1,
         fillColor: getPrisonColor(layer.feature)
     });
 
