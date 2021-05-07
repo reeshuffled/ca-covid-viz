@@ -30,6 +30,7 @@ const counties = [], prisons = [];
 
     // generate legend and add to map
     addMapLegend();
+    addPrisonLegend();
 
     // add data attribution for map
     map.attributionControl.addAttribution('Population data &copy; <a href="http://census.gov/">US Census Bureau</a>');
@@ -279,13 +280,63 @@ function addMapLegend() {
                 from + (to ? '&ndash;' + to : '+'));
         }
 
-        div.innerHTML +=  '<h4>Legend</h4> <table><tr><td><div id="circle"></div></td><td>Prison</td></tr></table>' + labels.join('<br>');
+        div.innerHTML +=  '<h4>Counties Legend</h4>' + labels.join('<br>');
 
         return div;
     };
 
     legend.addTo(map);
 }
+
+/**
+ * Create map legend for the prison colors for case numbers and add it to the
+ * map.
+ */
+ function addPrisonLegend() {
+    const myLegend = L.control({position: 'bottomleft'});
+
+    myLegend.onAdd = function (map) {
+        var div = L.DomUtil.create('div', 'info legend'),
+            grades = [
+                "no data",
+                "5%",
+                "10%",
+                "20%",
+                "30%",
+                "40%",
+                "50%"
+            ],
+            labels = [],
+            from, to;
+            grades = [
+                0,
+                .05,
+                .1,
+                .2,
+                .3,
+                .4,
+                50
+            ],
+            labels = [],
+            from, to;
+
+        for (var i = 0; i < grades.length; i++) {
+            from = grades[i];
+            to = grades[i + 1];
+
+            labels.push(
+                '<i style="background:' + getPrisonColorCapita(from + 1) + '"></i> ' +
+                from + (to ? '&ndash;' + to : '+'));
+        }
+
+        div.innerHTML +=  '<h4>Prison Percentages</h4> <table><tr><td><div id="circle"></div></td><td>Prison</td></tr></table>' + labels.join('<br>');
+
+        return div;
+    };
+
+    myLegend.addTo(map);
+}
+
 
 /**
  * Get the corresponding color for a daily case number within a range.
@@ -309,14 +360,13 @@ function getFillColorByCases(d) {
  * @returns {String} color
  */
  function getPrisonColorCapita(d) {
-    return d > .5 ? '#800026' :
-            d > .4  ? '#BD0026' :
-            d > .3  ? '#E31A1C' :
-            d > .2  ? '#FC4E2A' :
-            d > .1   ? '#FD8D3C' :
-            d > .05   ? '#FEB24C' :
-            d > .025   ? '#FED976' :
-                        '#FFEDA0';
+    return d > .5 ? '#0' :
+            d > .4 ? '#2F4F4F' :
+            d > .3  ? '#696969' :
+            d > .2  ? '#808080' :
+            d > .1 ? '#A9A9A9' :
+            d > .05 ? '#D3D3D3' :
+                        '#1E90FF';
 }
 
 /**
@@ -335,27 +385,28 @@ function getCountyStyle(feature) {
     };
 }
 
-function getPrisonStyle(feature) {
-    // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
-    const numResidents = feature.properties.residentsPopulation ? feature.properties.residentsPopulation : 
-        feature.properties.popFebTwenty  ? feature.properties.popFebTwenty  : "NA";
-
-    return {
-        weight: 2,
-        opacity: 1,
-        color: 'white',
-        dashArray: '3',
-        fillOpacity: 0.5,
-        fillColor: numResidents == "NA" ? "#0" : getFillColorByCases(feature.properties.casesRes / numResidents)
-    };
-}
-
 function getPrisonColor(feature) {
     // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
-    const numResidents = feature.properties.residentsPopulation ? feature.properties.residentsPopulation : 
-     feature.properties.popFebTwenty  ? feature.properties.popFebTwenty  : "NA";
+    let numResidents = "NA";
 
-    return numResidents == "NA" ? "#0" : getFillColorByCases(feature.properties.casesRes / numResidents);
+    // prefer resident population if reported
+    if (feature.properties.residentsPopulation)
+    {
+        if (feature.properties.residentsPopulation != "NA")
+        {
+            numResidents = feature.properties.residentsPopulation;
+        }
+        // fallback feb 1, 2020 population count
+        else if (feature.properties.popFebTwenty)
+        {
+            if (feature.properties.popFebTwenty != "NA")
+            {
+                numResidents = feature.properties.popFebTwenty;
+            }
+        }
+    }
+
+    return numResidents == "NA" ? "#0" : getPrisonColorCapita(feature.properties.casesRes / numResidents);
 }
 
 /**
@@ -367,8 +418,7 @@ function highlightFeature(e) {
 
     layer.setStyle({
         weight: 5,
-        color: '#666',
-        dashArray: '',
+        color: '#8A2BE2',
         fillOpacity: 0.5
     });
 
@@ -391,10 +441,10 @@ function highlightPrisonFeature(e) {
 
     layer.setStyle({
         weight: 4,
-        color: '#666',
+        color: '#8A2BE2',
         dashArray: 4,
-        fillOpacity: 0.75,
-        fillColor: getPrisonColor(layer.feature)
+        fillOpacity: 0.5,
+        fillColor: '#F0FFFF'
     });
 
     //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
@@ -434,7 +484,7 @@ function resetPrisonHighlight(e) {
         weight: 2,
         color: 'white',
         dashArray: 0,
-        fillOpacity: 0.75,
+        fillOpacity: 0.5,
         fillColor: getPrisonColor(layer.feature)
     });
 
