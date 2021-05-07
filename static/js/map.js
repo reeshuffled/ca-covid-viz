@@ -357,14 +357,26 @@ function addMapLegend() {
             ],
             labels = [];
             let from, to;
+            myGrades = [
+                "No data",
+                "5%",
+                "10%",
+                "20%",
+                "30%",
+                "40%",
+                "50%"
+            ],
+            myLabels = []
+            let here, there;
 
             for (var i = 0; i < grades.length; i++) {
                 from = grades[i];
                 to = grades[i + 1];
-    
+                here = myGrades[i]
+                there = myGrades[i+1]
                 labels.push(
-                    '<i style="background:' + getPrisonColorCapita(from) + '"></i> ' +
-                    from + (to ? '&ndash;' + to : '+'));
+                    '<i style="background:' + getPrisonColorCapita(from+.01) + '"></i> ' +
+                    here + (there ? '&ndash;' + there : '+'));
             }
     
             div.innerHTML +=  '<h4>Prison Legend</h4> ' + labels.join('<br>');
@@ -398,12 +410,12 @@ function getFillColorByCases(d) {
  * @returns {String} color
  */
  function getPrisonColorCapita(d) {
-    return d > .5 ? '#0' :
+    return d > .5 ? '#000000' :
             d > .4 ? '#2F4F4F' :
             d > .3  ? '#696969' :
             d > .2  ? '#808080' :
             d > .1 ? '#A9A9A9' :
-            d > .05 ? '#D3D3D3' :
+            d > .05 ? '#FFFFFF' :
                         '#1E90FF';
 }
 
