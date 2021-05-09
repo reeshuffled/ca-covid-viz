@@ -291,11 +291,11 @@ def conv_states_to_file():
         if not os.path.isdir(dir_path):
             continue
 
-        with open('states.geo.json' , 'a') as outfile:
+        with open( dir_path + '.js' , 'a') as outfile:
 
 
             for file_name in os.listdir(dir_path):
-                if not file_name.endswith('.txt'):
+                if not file_name.endswith('.geo.json'):
                     continue
 
                 file_path = os.path.join(dir_path, file_name)
