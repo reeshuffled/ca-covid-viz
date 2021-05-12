@@ -138,7 +138,7 @@ const counties = [], prisons = [];
                         opacity: 1,
                         color: 'white',
                         fillOpacity: 10,
-                        fillColor: getPrisonColor(feature)
+                        fillColor: getPrisonColor(layer.feature)
                     });
                 }
             }
@@ -326,10 +326,11 @@ function addMapLegend() {
 
             labels.push(
                 '<i style="background:' + getFillColorByCases(from + 1) + '"></i> ' +
-                from + (to ? '&ndash;' + to : '+'));
+                from + (to ? '&ndash;' + to : '+') + ' cases' );
         }
 
-        div.innerHTML +=  '<h4>Counties Legend</h4> ' + labels.join('<br>');
+        div.innerHTML +=  '<h4>Counties Legend</h4> ' + labels.join('<br>') + 
+                            '<br>[Each interval represents the</br> <h>total number of confirmed Covid</h> <br>cases in a given county.]</br>';
 
         return div;
     };
@@ -348,38 +349,45 @@ function addMapLegend() {
         const div = L.DomUtil.create('div', 'info legend'),
             grades = [
                 0,
-                .05,
-                .1,
-                .2,
-                .3,
-                .4,
-                .5
+                1,
+                100,
+                200,
+                300,
+                400,
+                500
             ],
             labels = [];
             let from, to;
             myGrades = [
                 "No data",
-                "5%",
-                "10%",
-                "20%",
-                "30%",
-                "40%",
-                "50%"
+                "1",
+                "100",
+                "200",
+                "300",
+                "400",
+                "500"
             ],
             myLabels = []
             let here, there;
 
-            for (var i = 0; i < grades.length; i++) {
+            from = grades[0];
+            here = myGrades[0]
+            labels.push(
+                '<i style="background:' + getPrisonColorCapita(from) + '"></i> ' + here
+            );
+
+            for (var i = 1; i < grades.length; i++) {
                 from = grades[i];
                 to = grades[i + 1];
                 here = myGrades[i]
                 there = myGrades[i+1]
                 labels.push(
                     '<i style="background:' + getPrisonColorCapita(from+.01) + '"></i> ' +
-                    here + (there ? '&ndash;' + there : '+'));
+                    here + (there ? '&ndash;' + there : '+') );
             }
     
-            div.innerHTML +=  '<h4>Prison Legend</h4> ' + labels.join('<br>');
+            div.innerHTML +=  '<h4>Prison Legend</h4> ' + labels.join('<br>') 
+                            + '<br>[Each interval represents the</br> <h>percentage of population</h> <br>in prison with Covid.]</br>';
     
             return div;
         };
@@ -410,13 +418,15 @@ function getFillColorByCases(d) {
  * @returns {String} color
  */
  function getPrisonColorCapita(d) {
-    return d > .5 ? '#000000' :
-            d > .4 ? '#2F4F4F' :
-            d > .3  ? '#696969' :
-            d > .2  ? '#808080' :
-            d > .1 ? '#A9A9A9' :
-            d > .05 ? '#FFFFFF' :
+
+    return d > 500 ? '#000000' :
+            d > 400 ? '#2F4F4F' :
+            d > 300  ? '#696969' :
+            d > 200  ? '#808080' :
+            d > 100 ? '#A9A9A9' :
+            d > 0 ? '#FFFFFF' :
                         '#1E90FF';
+    
 }
 
 /**
@@ -436,27 +446,49 @@ function getCountyStyle(feature) {
 }
 
 function getPrisonColor(feature) {
-    // prefer resident population if reported, fallback feb 1, 2020 population count and "NA" if neither is reported
-    let numResidents = "NA";
 
-    // prefer resident population if reported
-    if (feature.properties.residentsPopulation)
-    {
-        if (feature.properties.residentsPopulation != "NA")
-        {
-            numResidents = feature.properties.residentsPopulation;
-        }
-        // fallback feb 1, 2020 population count
-        else if (feature.properties.popFebTwenty)
-        {
-            if (feature.properties.popFebTwenty != "NA")
-            {
-                numResidents = feature.properties.popFebTwenty;
-            }
-        }
+    //no issues, add up staff and res
+    if(feature.properties.residentsConfirmed != "NA" && feature.properties.staffConfirmed != "NA"){
+
+        console.log("NO ISSUES")
+
+        return getPrisonColorCapita(feature.properties.residentsConfirmed + feature.properties.staffConfirmed);
+
     }
 
-    return numResidents == "NA" ? "#0" : getPrisonColorCapita(feature.properties.casesRes / numResidents);
+    //no staff, report res
+    else if(feature.properties.residentsConfirmed != "NA" && feature.properties.staffConfirmed == "NA"){
+
+        console.log("NO STAFF")
+
+        return getPrisonColorCapita(feature.properties.residentsConfirmed);
+
+    }
+
+    //no res, report staff
+    else if(feature.properties.residentsConfirmed == "NA" && feature.properties.staffConfirmed != "NA"){
+
+        console.log("NO RES")
+
+        return getPrisonColorCapita(feature.properties.staffConfirmed);
+
+    }
+
+    //no data, return blue
+    else if(feature.properties.residentsConfirmed == "NA" && feature.properties.staffConfirmed == "NA"){
+
+        return "#1E90FF";
+    }
+
+    else{
+
+        console.log("HERE")
+
+        return "#1E90FF";
+
+    }
+
+    //return ((numResidents == "NA" && feature.properties.staffConfirmed == "NA" && feature.properties.casesRes == "NA") ? "#1E90FF" : getPrisonColorCapita(feature.properties.casesRes / numResidents));
 }
 
 /**
