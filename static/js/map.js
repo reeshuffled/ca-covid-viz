@@ -295,6 +295,8 @@ async function getCasesByDate(date) {
             fillOpacity: 10,
             fillColor: getPrisonColor(feature)
         });
+
+        console.log(feature);
     });
 }
 
@@ -446,49 +448,22 @@ function getCountyStyle(feature) {
 }
 
 function getPrisonColor(feature) {
-
-    //no issues, add up staff and res
-    if(feature.properties.residentsConfirmed != "NA" && feature.properties.staffConfirmed != "NA"){
-
-        console.log("NO ISSUES")
-
-        return getPrisonColorCapita(feature.properties.residentsConfirmed + feature.properties.staffConfirmed);
-
+    // no issues, add up staff and res
+    if (feature.properties.casesRes != "NA" && feature.properties.casesStaff != "NA"){
+        return getPrisonColorCapita(feature.properties.casesRes + feature.properties.casesStaff);
     }
-
-    //no staff, report res
-    else if(feature.properties.residentsConfirmed != "NA" && feature.properties.staffConfirmed == "NA"){
-
-        console.log("NO STAFF")
-
-        return getPrisonColorCapita(feature.properties.residentsConfirmed);
-
+    // no staff, report res
+    else if (feature.properties.casesRes != "NA" && feature.properties.casesStaff == "NA"){
+        return getPrisonColorCapita(feature.properties.casesRes || 0);
     }
-
-    //no res, report staff
-    else if(feature.properties.residentsConfirmed == "NA" && feature.properties.staffConfirmed != "NA"){
-
-        console.log("NO RES")
-
-        return getPrisonColorCapita(feature.properties.staffConfirmed);
-
+    // no res, report staff
+    else if (feature.properties.casesRes == "NA" && feature.properties.casesStaff != "NA"){
+        return getPrisonColorCapita(feature.properties.casesStaff || 0);
     }
-
     //no data, return blue
-    else if(feature.properties.residentsConfirmed == "NA" && feature.properties.staffConfirmed == "NA"){
-
+    else if (feature.properties.casesRes == "NA" && feature.properties.casesStaff == "NA"){
         return "#1E90FF";
     }
-
-    else{
-
-        console.log("HERE")
-
-        return "#1E90FF";
-
-    }
-
-    //return ((numResidents == "NA" && feature.properties.staffConfirmed == "NA" && feature.properties.casesRes == "NA") ? "#1E90FF" : getPrisonColorCapita(feature.properties.casesRes / numResidents));
 }
 
 /**
