@@ -79,7 +79,7 @@ const counties = [], prisons = [];
             }
         }
     }).addTo(map);
-
+    //add to map the prisons based on longitude and latitude data
     prisonsGeoJson = L.geoJson(prisonData, {
         pointToLayer: (feature, latlng) => {
             return L.circleMarker(latlng, {
@@ -99,19 +99,19 @@ const counties = [], prisons = [];
 
             if (layer.feature.properties.kind == "prison")
             {
-                // add the feature to the counties array
+                // add the feature to the prison array
                 prisons.push({
                     layer: layer,
                     feature: layer.feature
                 });
 
-                // find the case data for the county
+                // find the case data for the prisons
                 const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name);
 
-                // if there is case data found for the county
+                // if there is case data found for the prisons
                 if (prsnCaseData != null)
                 {
-                    // update the county cases and death properties
+                    // update the prison cases and death properties
                     layer.feature.properties.date = prsnCaseData.date;
                     layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
                     layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
@@ -162,10 +162,10 @@ function addInfoBox() {
             '<b>' + props.name + '</b><br />' + (props.cases ? props.cases : "NA") + ' cases<br /> ' + (props.deaths ? props.deaths : "NA") + ' deaths<br />'  + 
             ' Last reported: <br /> ' + (props.date ? props.date : "NA") + ' <br />': 'Hover over a county');
     };
-
+//add to map
     countyInfoBox.addTo(map);
 }
-
+//same but for the prison
 function addPrsnBox() {
     prisonInfoBox.onAdd = function(map) {
         this._div = L.DomUtil.create('div', 'info');
@@ -174,7 +174,7 @@ function addPrsnBox() {
 
         return this._div;
     };
-
+    //prison infobox requires more quierying because of all the null values 
     prisonInfoBox.update = function(props) {
 
         this._div.innerHTML = '<h4>Prison Cases</h4>' +  (props ?
@@ -185,7 +185,7 @@ function addPrsnBox() {
             + (Number.isFinite(props.staffRecovered) ? props.staffRecovered : "NA") + ' staff recovered <br /> ' + (Number.isFinite(props.popFebTwenty) ? props.popFebTwenty : "NA") 
             + ' total Population <br />' +' Last reported: <br /> ' + (Number.isFinite(props.date) ? props.date : "NA") + ' <br />': 'Hover over a prison');
     };
-
+//add to map
     prisonInfoBox.addTo(map);
 }
 
@@ -253,17 +253,17 @@ async function getCasesByDate(date) {
             county.layer.setStyle(getCountyStyle(county.feature));
         }
 
-        countyInfoBox.update(county.layer.feature.properties);
+        countyInfoBox.update(county.layer.feature.properties);//push update
     });
 
     prisons.forEach(prison => {
         const layer = prison.layer;
         const feature = prison.feature;
 
-        // find the case data for the county
+        // find the case data for the prison
         const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name) || {};
 
-        // update the county cases and death properties
+        // update the prison cases and death properties
         layer.feature.properties.date = prsnCaseData.date;
         layer.feature.properties.casesRes = prsnCaseData.residentsConfirmed;
         layer.feature.properties.casesStaff = prsnCaseData.staffConfirmed;
@@ -296,7 +296,7 @@ async function getCasesByDate(date) {
 
 /**
  * Create map legend for the choropleth colors for case numbers and add it to the
- * map.
+ * map. For counties
  */
 function addMapLegend() {
     const legend = L.control({position: 'bottomright'});
@@ -316,7 +316,7 @@ function addMapLegend() {
             labels = [],
             from, to;
 
-        for (var i = 0; i < grades.length; i++) {
+        for (var i = 0; i < grades.length; i++) {//for each row in the legend print to color next to it and the grades of cases
             from = grades[i];
             to = grades[i + 1];
 
@@ -328,7 +328,7 @@ function addMapLegend() {
         div.innerHTML +=  '<h4>Counties Legend</h4> ' + labels.join('<br>') + 
                             '<br>[Each interval represents the</br> <h>total number of confirmed Covid</h> <br>cases in a given county.]</br>';
 
-        return div;
+        return div;//output as dangerously set html
     };
 
     legend.addTo(map);
@@ -367,7 +367,7 @@ function addMapLegend() {
             let here, there;
 
             from = grades[0];
-            here = myGrades[0]
+            here = myGrades[0] //for each row in the legend print to color next to it and the grades of cases
             labels.push(
                 '<i style="background:' + getPrisonColorCapita(from) + '"></i> ' + here
             );
@@ -385,7 +385,7 @@ function addMapLegend() {
             div.innerHTML +=  '<h4>Prison Legend</h4> ' + labels.join('<br>') 
                             + '<br>[Each interval represents the</br> <h>total number of confirmed</h> <br>Covid cases in a specific facility]</br>';
     
-            return div;
+            return div; //returnhtml
         };
     
         myLegend.addTo(map);
@@ -409,7 +409,7 @@ function getFillColorByCases(d) {
 }
 
 /**
- * Get the corresponding color for a daily case number within a range.
+ * Get the corresponding color for a daily case number within a range for prisons.
  * @param {Number} d 
  * @returns {String} color
  */
@@ -472,7 +472,7 @@ function getPrisonColor(feature) {
  * Highlight a feature on hover.
  * @param {Event} e 
  */
-function highlightFeature(e) {
+function highlightFeature(e) {//purple highlight on hover to make more obvious what the boxes show
     const layer = e.target;
 
     layer.setStyle({
@@ -498,7 +498,7 @@ function highlightFeature(e) {
 function highlightPrisonFeature(e) {
     const layer = e.target;
 
-    layer.setStyle({
+    layer.setStyle({//purple highlight on hover
         weight: 4,
         color: '#8A2BE2',
         dashArray: 4,
@@ -531,12 +531,12 @@ function highlightPrisonFeature(e) {
 }
 
 function resetHighlight(e) {
-    countiesGeoJson.resetStyle(e.target);
+    countiesGeoJson.resetStyle(e.target);//undo highlight
 
     countyInfoBox.update();
 }
 
-function resetPrisonHighlight(e) {
+function resetPrisonHighlight(e) {//undo highlight of prisons
     const layer = e.target;
 
     layer.setStyle({
@@ -551,5 +551,5 @@ function resetPrisonHighlight(e) {
 }
 
 function zoomToFeature(e) {
-    map.fitBounds(e.target.getBounds());
+    map.fitBounds(e.target.getBounds());//zoom on click
 }
