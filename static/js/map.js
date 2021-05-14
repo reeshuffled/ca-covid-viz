@@ -83,12 +83,11 @@ const counties = [], prisons = [];
     prisonsGeoJson = L.geoJson(prisonData, {
         pointToLayer: (feature, latlng) => {
             return L.circleMarker(latlng, {
-                radius: 10,
-                fillColor: "#0",
-                color: "#000",
-                weight: 1,
+                weight: 2,
                 opacity: 1,
-                fillOpacity: 10
+                color: 'black',
+                fillOpacity: 10,
+                fillColor: '#1E90FF'
             });
         },
         onEachFeature: (feature, layer) => {
@@ -136,7 +135,7 @@ const counties = [], prisons = [];
                     layer.setStyle({
                         weight: 2,
                         opacity: 1,
-                        color: 'white',
+                        color: 'black',
                         fillOpacity: 10,
                         fillColor: getPrisonColor(layer.feature)
                     });
@@ -160,8 +159,8 @@ function addInfoBox() {
 
     countyInfoBox.update = function(props) {
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-            '<b>' + props.name + '</b><br />' + props.cases + ' cases<br /> ' + props.deaths + ' deaths<br />'  + 
-            ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a county');
+            '<b>' + props.name + '</b><br />' + (props.cases ? props.cases : "NA") + ' cases<br /> ' + (props.deaths ? props.deaths : "NA") + ' deaths<br />'  + 
+            ' Last reported: <br /> ' + (props.date ? props.date : "NA") + ' <br />': 'Hover over a county');
     };
 
     countyInfoBox.addTo(map);
@@ -177,17 +176,14 @@ function addPrsnBox() {
     };
 
     prisonInfoBox.update = function(props) {
-        if (props)
-        {
-            var cases = parseInt(props.residentsConfirmed, 10) + parseInt(props.staffConfirmed, 10)
-        }
 
-        // ToDo: Create an if statement for NaN for casesRes, casesStaff, deathsRes, deathsStaff, resRecovered, staffRecovered, popFebTwenty and adjust innerHTML accordingly
         this._div.innerHTML = '<h4>Prison Cases</h4>' +  (props ?
-            '<b>' + props.name +'</b><br />' + props.residentsConfirmed + ' resident cases<br /> ' + props.staffConfirmed + ' staff cases<br />'  + 
-            props.residentsDeaths + ' resident deaths<br />' + props.staffDeaths + ' staff deaths<br />' + props.residentsRecovered + ' resident recovered <br /> ' +
-            props.staffRecovered + ' staff recovered <br /> ' + props.popFebTwenty + ' total Population <br />' +
-            ' Last reported: <br /> ' + props.date + ' <br />': 'Hover over a prison');
+            '<b>' + props.name +'</b><br />' + ((Number.isFinite(props.residentsConfirmed)) ? props.residentsConfirmed:"NA") + ' resident cases<br /> ' + 
+            (Number.isFinite(props.staffConfirmed) ? props.staffConfirmed:"NA") + ' staff cases<br />'  + 
+            (Number.isFinite(props.residentsDeaths) ? props.residentsDeaths: "NA") + ' resident deaths<br />' + (Number.isFinite(props.staffDeaths) ? props.staffDeaths: "NA") 
+            + ' staff deaths<br />' + (Number.isFinite(props.residentsRecovered) ?  props.residentsRecovered : "NA") + ' resident recovered <br /> ' 
+            + (Number.isFinite(props.staffRecovered) ? props.staffRecovered : "NA") + ' staff recovered <br /> ' + (Number.isFinite(props.popFebTwenty) ? props.popFebTwenty : "NA") 
+            + ' total Population <br />' +' Last reported: <br /> ' + (Number.isFinite(props.date) ? props.date : "NA") + ' <br />': 'Hover over a prison');
     };
 
     prisonInfoBox.addTo(map);
@@ -291,12 +287,10 @@ async function getCasesByDate(date) {
         layer.setStyle({
             weight: 2,
             opacity: 1,
-            color: 'white',
+            color: 'black',
             fillOpacity: 10,
             fillColor: getPrisonColor(feature)
         });
-
-        console.log(feature);
     });
 }
 
@@ -350,8 +344,8 @@ function addMapLegend() {
     myLegend.onAdd = function (map) {
         const div = L.DomUtil.create('div', 'info legend'),
             grades = [
+                -1,
                 0,
-                1,
                 100,
                 200,
                 300,
@@ -362,7 +356,7 @@ function addMapLegend() {
             let from, to;
             myGrades = [
                 "No data",
-                "1",
+                "0",
                 "100",
                 "200",
                 "300",
@@ -389,7 +383,7 @@ function addMapLegend() {
             }
     
             div.innerHTML +=  '<h4>Prison Legend</h4> ' + labels.join('<br>') 
-                            + '<br>[Each interval represents the</br> <h>percentage of population</h> <br>in prison with Covid.]</br>';
+                            + '<br>[Each interval represents the</br> <h>total number of confirmed</h> <br>Covid cases in a specific facility]</br>';
     
             return div;
         };
@@ -421,12 +415,12 @@ function getFillColorByCases(d) {
  */
  function getPrisonColorCapita(d) {
 
-    return d > 500 ? '#000000' :
-            d > 400 ? '#2F4F4F' :
-            d > 300  ? '#696969' :
-            d > 200  ? '#808080' :
-            d > 100 ? '#A9A9A9' :
-            d > 0 ? '#FFFFFF' :
+    return d > 500 ? '#800026' :
+            d > 400 ? '#BD0026' :
+            d > 300  ? '#E31A1C' :
+            d > 200  ? '#FC4E2A' :
+            d > 100 ? '#FD8D3C' :
+            d >= 0 ? '#FFEDA0' :
                         '#1E90FF';
     
 }
@@ -448,6 +442,9 @@ function getCountyStyle(feature) {
 }
 
 function getPrisonColor(feature) {
+
+    console.log(feature)
+
     // no issues, add up staff and res
     if (feature.properties.casesRes != "NA" && feature.properties.casesStaff != "NA"){
         return getPrisonColorCapita(feature.properties.casesRes + feature.properties.casesStaff);
@@ -462,8 +459,13 @@ function getPrisonColor(feature) {
     }
     //no data, return blue
     else if (feature.properties.casesRes == "NA" && feature.properties.casesStaff == "NA"){
+
+        console.log("Here")
         return "#1E90FF";
     }
+
+    return "#1E90FF"
+
 }
 
 /**
@@ -539,7 +541,7 @@ function resetPrisonHighlight(e) {
 
     layer.setStyle({
         weight: 2,
-        color: 'white',
+        color: 'black',
         dashArray: 0,
         fillOpacity: 10,
         fillColor: getPrisonColor(layer.feature)
