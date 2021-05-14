@@ -16,14 +16,14 @@ db = SQLAlchemy(app)
 COUNTY_URL = "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv"
 PRISON_URL = "https://raw.githubusercontent.com/uclalawcovid19behindbars/historical-data/main/data/CA-historical-data.csv"
 
-# constants for the CSV file
+# constants for the county CSV file
 DATE_INDEX = 0
 COUNTY_INDEX = 1
 STATE_INDEX = 2
 CASES_INDEX = 4
 DEATHS_INDEX = 5
 
-class Day(db.Model):
+class County(db.Model):
     """
     The Student model that is stored in the SQL database.
     """
@@ -83,8 +83,8 @@ def get_data_by_date():
         return "You need to supply a date in your request JSON body.", 400 
 
     # get the latest and ealier dates in the database
-    earliest_date = Day.query.order_by(Day.id)[1].date
-    latest_date = Day.query.order_by(-Day.id).first().date
+    earliest_date = County.query.order_by(County.id)[1].date
+    latest_date = County.query.order_by(-County.id).first().date
     earliest_date_obj = datetime.strptime(earliest_date, "%Y-%m-%d")
     latest_date_obj = datetime.strptime(latest_date, "%Y-%m-%d") 
 
@@ -96,7 +96,7 @@ def get_data_by_date():
     if date > latest_date_obj:
         county_date = latest_date
 
-    county_results = Day.query.filter_by(date=county_date).all()
+    county_results = County.query.filter_by(date=county_date).all()
 
     # roll back date until there are entries in the DB
     while len(list(county_results)) == 0:
@@ -111,7 +111,7 @@ def get_data_by_date():
         county_date = datetime.strftime(date_obj, "%Y-%m-%d")
 
         # check database to see if there are entries for this date
-        county_results = Day.query.filter_by(date=county_date).all()
+        county_results = County.query.filter_by(date=county_date).all()
 
     # convert Day objects into dictionaries that are easily JSON-ified
     county_data = []
@@ -235,7 +235,7 @@ def init_db():
         }
 
         # create a Day object and add to the database
-        db.session.add(Day(**data))
+        db.session.add(County(**data))
 
         # save the new student in the database
         db.session.commit()
