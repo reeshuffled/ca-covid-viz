@@ -460,7 +460,6 @@ function getPrisonColor(feature) {
     //no data, return blue
     else if (feature.properties.casesRes == "NA" && feature.properties.casesStaff == "NA"){
 
-        console.log("Here")
         return "#1E90FF";
     }
 
@@ -505,10 +504,6 @@ function highlightPrisonFeature(e) {
         fillOpacity: 10,
         fillColor: '#F0FFFF'
     });
-
-    //if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
-        //layer.bringToFront();
-    //}
 
     // find the case data for the county
     const prsnCaseData = cases.prison.find(x => x.name == layer.feature.properties.name);
