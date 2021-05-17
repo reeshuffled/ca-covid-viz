@@ -159,8 +159,8 @@ function addInfoBox() {
 
     countyInfoBox.update = function(props) {
         this._div.innerHTML = '<h4>US Cases</h4>' +  (props ?
-            '<b>' + props.name + '</b><br />' + (props.cases ? props.cases : "NA") + ' cases<br /> ' + (props.deaths ? props.deaths : "NA") + ' deaths<br />'  + 
-            ' Last reported: <br /> ' + (props.date ? props.date : "NA") + ' <br />': 'Hover over a county');
+            '<b>' + props.name + '</b><br />' + (props.cases ? props.cases : "NA") + ' cases<br /> ' + (props.deaths ? props.deaths : "NA") + ' deaths<br />' 
+            + ' <br />': 'Hover over a county');
     };
 //add to map
     countyInfoBox.addTo(map);
@@ -183,7 +183,7 @@ function addPrsnBox() {
             (Number.isFinite(props.residentsDeaths) ? props.residentsDeaths: "NA") + ' resident deaths<br />' + (Number.isFinite(props.staffDeaths) ? props.staffDeaths: "NA") 
             + ' staff deaths<br />' + (Number.isFinite(props.residentsRecovered) ?  props.residentsRecovered : "NA") + ' resident recovered <br /> ' 
             + (Number.isFinite(props.staffRecovered) ? props.staffRecovered : "NA") + ' staff recovered <br /> ' + (Number.isFinite(props.popFebTwenty) ? props.popFebTwenty : "NA") 
-            + ' total Population <br />' +' Last reported: <br /> ' + (Number.isFinite(props.date) ? props.date : "NA") + ' <br />': 'Hover over a prison');
+            + ' total Population <br />' + ' <br />': 'Hover over a prison');
     };
 //add to map
     prisonInfoBox.addTo(map);

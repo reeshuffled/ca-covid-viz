@@ -185,36 +185,6 @@ def get_data_by_date():
         "prisonData": prison_data
     }
 
-#function that was utilized to create a prison GEOJSON for the map
-def create_pointers():
-    with open("CA-historical-data.csv") as csvfile:
-        # create a CSV reader for the file
-        reader = csv.reader(csvfile)
-
-        prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
-
-    features = []
-    
-    # create DB objects for each CA entry from the CSV file
-    pairs = []
-
-    for entry in prison_data:
-        if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs and entry[PRSN_LAT] != "NA":
-            point = Point((float(entry[PRSN_LON]), float(entry[PRSN_LAT])))
-
-            features.append(Feature(geometry=point, properties={
-                "kind": "prison",
-                "name": entry[PRSN_NAME],
-                "facilityID": entry[FACILITY_ID]
-            }))
-
-            pairs.append([entry[PRSN_LAT], entry[PRSN_LON]])
-                
-    feature_collection = FeatureCollection(features)
-
-    with open('myfile.geojson', 'w') as f:
-        dump(feature_collection, f)
-
 #This function is utilized whenever the database needs to be initialized or updated
 def init_db():
 
@@ -284,6 +254,37 @@ def init_db():
 
         # save the new prison in the database
         db.session.commit()
+
+#function that was utilized to create a prison GEOJSON for the map
+def create_pointers():
+    with open("CA-historical-data.csv") as csvfile:
+        # create a CSV reader for the file
+        reader = csv.reader(csvfile)
+
+        prison_data = list(filter(lambda x: x[PRSN_STATE] == "California", reader))
+
+    features = []
+    
+    # create DB objects for each CA entry from the CSV file
+    pairs = []
+
+    for entry in prison_data:
+        if [entry[PRSN_LAT], entry[PRSN_LON]] not in pairs and entry[PRSN_LAT] != "NA":
+            point = Point((float(entry[PRSN_LON]), float(entry[PRSN_LAT])))
+
+            features.append(Feature(geometry=point, properties={
+                "kind": "prison",
+                "name": entry[PRSN_NAME],
+                "facilityID": entry[FACILITY_ID]
+            }))
+
+            pairs.append([entry[PRSN_LAT], entry[PRSN_LON]])
+                
+    feature_collection = FeatureCollection(features)
+
+    with open('myfile.geojson', 'w') as f:
+        dump(feature_collection, f)
+
 
 #function we used to convert all of the counties for each state into a single GeoJson File
 def conv_states_to_file():
